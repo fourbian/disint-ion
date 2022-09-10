@@ -1,13 +1,12 @@
 import React from "react";
 import { DisintComment } from "../models/DisintComment";
 import "./CommentStandard.css"
-import { MarkdownEditor } from "./MarkdownEditor";
+import { MarkdownController } from "./markdown/MarkdownController";
+import { MarkdownEditor } from "./markdown/MarkdownEditor";
 
 export class CommentStandard extends React.Component<{ comment: DisintComment<any> }> {
-
-  onMarkdownChange() {
-
-  }
+  markdownController: MarkdownController = new MarkdownController();
+  
 
   render() {
 
@@ -21,7 +20,7 @@ export class CommentStandard extends React.Component<{ comment: DisintComment<an
       <p>
         cid: {this.props.comment.cid}
       </p>
-      <MarkdownEditor markdown={this.props.comment.content} onMarkdownChange={this.onMarkdownChange}></MarkdownEditor>
+      <MarkdownEditor markdown={this.props.comment.content} onMarkdownControllerChange={(_) => this.markdownController = _}></MarkdownEditor>
       <pre>
         content: {JSON.stringify(this.props.comment.content, null, 2)}
       </pre>

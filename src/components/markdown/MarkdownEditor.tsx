@@ -8,31 +8,36 @@ import { clipboard } from '@milkdown/plugin-clipboard';
 import { slash } from '@milkdown/plugin-slash';
 import { menu } from '@milkdown/plugin-menu';
 import { listener, listenerCtx } from '@milkdown/plugin-listener';
-import { Slice } from "prosemirror-model";
 
 import './MarkdownEditor.css'
+import { MarkdownController } from './MarkdownController';
 
 //  more at https://programming.vip/docs/milkdown-editor-integration-guide.html
 // binary at /usr/local/lib/node_modules/@ceramicnetwork/cli/node_modules/go-ipfs/bin/ipfs
-export const MarkdownEditor: React.FC<{ onMarkdownChange: (markdown: string) => void, markdown: string }> = (props) => {
+export const MarkdownEditor: React.FC<{ onMarkdownControllerChange: (markdownController: MarkdownController) => void, markdown: string }> = (props) => {
     //let editor: Editor;
-    let [editor, setEditor] = React.useState(null as unknown as Editor);
     let [changingInternally, setChangingInternally] = React.useState(false);
+    let [markdownController, setMarkdownController] = React.useState<MarkdownController>(null as any);
 
     React.useEffect(() => {
         if (!changingInternally) {
-            setTimeout(() => setMarkdown(''), 0);
+            setTimeout(() => markdownController?.setMarkdown(''), 0);
+        }
+
+        return () => { // onDestroy
+            
         }
     }, [props.markdown]);
 
     const reactEditor = useEditor((root) => {
-
+        console.log("useEditor()");
         let createdEditor = Editor.make()
             .config((ctx) => {
+                console.log("configEditor()");
                 ctx.set(rootCtx, root);
                 ctx.get<any>(listenerCtx).markdownUpdated((ctx: any, markdown: string, prevMarkdown: string) => {
                     setChangingInternally(previous => true);
-                    props.onMarkdownChange(markdown);
+                    markdownController?.subject.next(markdown);
                     setChangingInternally(previous => false);
                 });
             })
@@ -44,43 +49,19 @@ export const MarkdownEditor: React.FC<{ onMarkdownChange: (markdown: string) => 
             //.use(menu())
             .use(commonmark);
 
-        setEditor(createdEditor);
-        setTimeout(() => setMarkdown(props.markdown, createdEditor), 1000);
+        if (!markdownController) {
+            markdownController = new MarkdownController();
+            setMarkdownController(markdownController);
+        }
+        markdownController?.setEditor(createdEditor);
+        setTimeout(() => markdownController?.setMarkdown(props.markdown), 1000);
+        props.onMarkdownControllerChange(markdownController as any);
         return createdEditor;
 
     });
 
+    if (markdownController) props.onMarkdownControllerChange(markdownController);
 
-    let getMarkdown = (): string => {
-        return editor?.action((ctx) => {
-            const editorView = ctx.get(editorViewCtx);
-            const serializer = ctx.get(serializerCtx);
-            return serializer(editorView.state.doc);
-        });
-    }
-
-    let setMarkdown = (markdown: string, fallbackEditor: Editor | null = null) => {
-        editor = editor || fallbackEditor;
-        editor?.action((ctx) => {
-
-            const view = ctx.get(editorViewCtx);
-            const parser = ctx.get(parserCtx);
-            const doc = parser(markdown);
-            if (!doc) return;
-            const state = view.state;
-            view.dispatch(
-                state.tr.replace(
-                    0,
-                    state.doc.content.size,
-                    new Slice(doc.content, 0, 0)
-                )
-            );
-        });
-    }
-
-    let clear = () => {
-        setMarkdown("");
-    }
 
     return <ReactEditor editor={reactEditor} />;
 };
