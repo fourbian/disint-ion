@@ -12,6 +12,7 @@ import { CommentStandard } from '../components/CommentStandard';
 import { DisintComment } from '../models/DisintComment';
 import { MarkdownController } from '../components/markdown/MarkdownController';
 import { debounce, debounceTime, Observable, Subscription, tap } from 'rxjs';
+import { commentService } from '../services/CommentService';
 
 const HomeLayout: React.FC = () => {
 
@@ -26,7 +27,6 @@ const HomeLayout: React.FC = () => {
   
   useEffect(() => {
     return () => { // onDestroy
-      if (!subscription) console.error("wtf");
       subscription?.unsubscribe();
     }
   })
@@ -50,6 +50,8 @@ const HomeLayout: React.FC = () => {
 
   let create = async () => {
     //let streamId = await portal.create(markdown, 'text/markdown', _parentStreamId);
+    commentService.add<string>(new DisintComment<string>());
+    
     markdownController.setMarkdown('');
     //await commentNavigator.current?.loadComments();
     //let comment = comments[0];
