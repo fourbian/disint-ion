@@ -3,16 +3,17 @@ import React, { useEffect, useState } from 'react';
 import { createRef } from 'react';
 import { useParams } from 'react-router';
 import { MarkdownEditor } from '../components/markdown/MarkdownEditor';
-import { CommentNavigator } from '../components/CommentNavigator';
+import { CommentNavigator } from '../components/comments/CommentNavigator';
 import './HomeLayout.css';
 import { CeramicPortal, CeramicProfile } from '../lib/ceramic/ceramic-portal';
 import config from '../config.json'
 import { TileDocument } from '@ceramicnetwork/stream-tile';
-import { CommentStandard } from '../components/CommentStandard';
+import { CommentStandard } from '../components/comments/CommentStandard';
 import { DisintComment } from '../models/DisintComment';
 import { MarkdownController } from '../components/markdown/MarkdownController';
 import { debounce, debounceTime, Observable, Subscription, tap } from 'rxjs';
-import { commentService } from '../services/CommentService';
+import { commentService } from '../services/comments/CommentService';
+import { Mimetypes } from '../services/comments/ICommentService';
 
 const HomeLayout: React.FC = () => {
 
@@ -31,8 +32,6 @@ const HomeLayout: React.FC = () => {
     }
   })
   
-  console.log("rendering...");
-
   let updateMarkdownController = (markdownController: MarkdownController) => {
     setMarkdownController(markdownController);
     if (subscription) subscription.unsubscribe();
@@ -50,14 +49,18 @@ const HomeLayout: React.FC = () => {
 
   let create = async () => {
     //let streamId = await portal.create(markdown, 'text/markdown', _parentStreamId);
-    commentService.add<string>(new DisintComment<string>());
-    
+    let comment = await commentService.add<string>(markdownController.getMarkdown(), Mimetypes.MARKDOWN);
+    console.log(comment);
     markdownController.setMarkdown('');
-    //await commentNavigator.current?.loadComments();
-    //let comment = comments[0];
-    //let commit = await portal.getCommit(comment.anchorCommitIds[0], comment.id.toString());
-  }
 
+    // a few ways to do this:
+    // 1) pass in the comments.  but, we want commentNavigator to take care of its own comments
+    // 2) force some opts to update to re-render the navigator
+    // 3) get a ref to commentNavigator and call it manually.
+    // 4) convert this to a class component from a function component, and then call this.forceUpdate()
+    commentNavigator.current?.loadComments();
+
+  }
 
   return (
     <IonPage>

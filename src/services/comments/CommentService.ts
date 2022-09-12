@@ -1,10 +1,10 @@
 import { ICommentService } from "./ICommentService";
-import { StorageCommentService } from "./StorageCommentService";
+import { LocalStorageCommentService } from "./LocalStorageCommentService";
 
 let commentService: ICommentService;
 
 if (process.env.NODE_ENV == "development") {
-    commentService = new StorageCommentService();
+    commentService = new LocalStorageCommentService();
 } else {
     throw new Error(`No service defined for ${process.env.NODE_ENV}`);
 }

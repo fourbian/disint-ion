@@ -1,9 +1,9 @@
 import React from "react";
-import { CeramicPortal, CeramicProfile, ICeramicPortal } from "../lib/ceramic/ceramic-portal";
-import config from '../config.json'
-import { DisintComment } from "../models/DisintComment";
+import config from '../../config.json'
+import { DisintComment } from "../../models/DisintComment";
 import { CommentStandard } from "./CommentStandard";
 import { Link } from "react-router-dom";
+import { commentQueryService } from "../../services/comments/CommentQueryService"
 
 class CommentNavigatorProps {
     parentStreamId: string;
@@ -15,14 +15,12 @@ class CommentNavigatorState {
 }
 
 export class CommentNavigator extends React.Component<CommentNavigatorProps, CommentNavigatorState> {
-    portal: ICeramicPortal;
     _parentComment: DisintComment<any>;
     _loading = false;
 
     public constructor(props: CommentNavigatorProps) {
         super(props);
         this.state = new CommentNavigatorState();
-        this.portal = CeramicPortal.getInstance(config.ceramicEndpoints);
     }
 
     async componentDidMount() {
@@ -34,7 +32,7 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
         if (this._loading) return
         this._loading = true;
 
-        const comments = await this.portal.loadChildrenComments(this._parentComment.id)
+        const comments = await commentQueryService.mine();
 
         this.setState({ comments });
 
@@ -42,7 +40,7 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
     }
 
     async loadParentDocument() {
-        this._parentComment = await this.portal.lookupStream(this.props.parentStreamId);
+        //this._parentComment = null; //await this.portal.lookupStream(this.props.parentStreamId);
     }
 
 
