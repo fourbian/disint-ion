@@ -5,23 +5,20 @@ import { useParams } from 'react-router';
 import { MarkdownEditor } from '../components/markdown/MarkdownEditor';
 import { CommentNavigator } from '../components/comments/CommentNavigator';
 import './HomeLayout.css';
-import { CeramicPortal, CeramicProfile } from '../lib/ceramic/ceramic-portal';
-import config from '../config.json'
-import { TileDocument } from '@ceramicnetwork/stream-tile';
-import { CommentStandard } from '../components/comments/CommentStandard';
-import { DisintComment } from '../models/DisintComment';
 import { MarkdownController } from '../components/markdown/MarkdownController';
 import { debounce, debounceTime, Observable, Subscription, tap } from 'rxjs';
 import { commentService } from '../services/comments/CommentService';
 import { Mimetypes } from '../services/comments/ICommentService';
+import { CommentQuery } from '../models/CommentQuery';
 
 const HomeLayout: React.FC = () => {
 
   let commentNavigator = React.createRef<CommentNavigator>();
 
-  const { streamId } = useParams<{ streamId: string; }>();
-  let _parentStreamId = streamId || config.rootDocumentStreamId;
-  let portal = CeramicPortal.getInstance(config.ceramicEndpoints);
+  const params = useParams<{ commentId: string; }>();
+  const parentCommentId = params.commentId || "";
+  const query = new CommentQuery({parentId: parentCommentId});
+
   let subscription: Subscription | null = null;
 
   let [markdownController, setMarkdownController] = useState(new MarkdownController());
@@ -49,7 +46,7 @@ const HomeLayout: React.FC = () => {
 
   let create = async () => {
     //let streamId = await portal.create(markdown, 'text/markdown', _parentStreamId);
-    let comment = await commentService.add<string>(markdownController.getMarkdown(), Mimetypes.MARKDOWN);
+    let comment = await commentService.create<string>(markdownController.getMarkdown(), Mimetypes.MARKDOWN, parentCommentId);
     console.log(comment);
     markdownController.setMarkdown('');
 
@@ -69,20 +66,20 @@ const HomeLayout: React.FC = () => {
           <IonButtons slot="start">
             <IonMenuButton />
           </IonButtons>
-          <IonTitle>{_parentStreamId}</IonTitle>
+          <IonTitle>{parentCommentId}</IonTitle>
         </IonToolbar>
       </IonHeader>
 
       <IonContent >
         <IonHeader collapse="condense">
           <IonToolbar>
-            <IonTitle size="large">{_parentStreamId}</IonTitle>
+            <IonTitle size="large">{parentCommentId}</IonTitle>
           </IonToolbar>
         </IonHeader>
         <MarkdownEditor onMarkdownControllerChange={_ => updateMarkdownController(_)} markdown={markdownController.getMarkdown()} />
         <IonButton onClick={create}>Save</IonButton>
 
-        <CommentNavigator parentStreamId={_parentStreamId} ref={commentNavigator}></CommentNavigator>
+        <CommentNavigator query={query} ref={commentNavigator}></CommentNavigator>
       </IonContent>
     </IonPage>
   );

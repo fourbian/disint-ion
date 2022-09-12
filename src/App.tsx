@@ -40,7 +40,7 @@ const App: React.FC = () => {
             <Route path="/" exact={true}>
               <HomeLayout />
             </Route>
-            <Route path="/comments/:streamId" exact={true}>
+            <Route path="/comments/:commentId" exact={true}>
               <HomeLayout />
             </Route>
           </IonRouterOutlet>

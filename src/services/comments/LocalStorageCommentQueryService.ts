@@ -1,20 +1,35 @@
+import { CommentQuery } from "../../models/CommentQuery";
 import { DisintComment } from "../../models/DisintComment";
-import { v4 as uuidv4 } from 'uuid';
 import { ICommentQueryService } from "./ICommentQueryService";
 
 export class LocalStorageCommentQueryService implements ICommentQueryService {
     private load(): DisintComment<any>[] {
         const dbString = localStorage.getItem('disint.db');
-        return dbString ? JSON.parse(dbString as string) : [];
+        const comments = dbString ? JSON.parse(dbString as string) : [];
+        return comments.map((c: any) => new DisintComment(c));
     }
 
-    async mine(): Promise<DisintComment<any>[]> {
-        return this.load().map(c => DisintComment.from(c));
+    private async query(query: CommentQuery): Promise<DisintComment<any>[]> {
+        let comments = this.load();
+        if (query.parentId) {
+            let parentFilter = (c: DisintComment<any>) => {
+                let matchingParentWithAnyChildren = c.id == query.parentId && c.childrenIds?.length;
+                let anyChildWithMatchingParent = c.parentIds?.includes(query.parentId);
+                return matchingParentWithAnyChildren || anyChildWithMatchingParent;
+            }
+            comments = comments.filter(parentFilter);
+        }
+        return comments;
     }
 
-    async all(): Promise<DisintComment<any>[]> {
-        return this.load();
+    async mine(query: CommentQuery): Promise<DisintComment<any>[]> {
+        // TODO: update query to set current user id somehow
+        return await this.query(query);
     }
-    
+
+    async all(query: CommentQuery): Promise<DisintComment<any>[]> {
+        return await this.query(query);
+    }
+
 
 }

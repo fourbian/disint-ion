@@ -4,9 +4,10 @@ import { DisintComment } from "../../models/DisintComment";
 import { CommentStandard } from "./CommentStandard";
 import { Link } from "react-router-dom";
 import { commentQueryService } from "../../services/comments/CommentQueryService"
+import { CommentQuery } from "../../models/CommentQuery";
 
 class CommentNavigatorProps {
-    parentStreamId: string;
+    query: CommentQuery;
     ref: any;
 }
 
@@ -32,7 +33,7 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
         if (this._loading) return
         this._loading = true;
 
-        const comments = await commentQueryService.mine();
+        const comments = await commentQueryService.mine(this.props.query);
 
         this.setState({ comments });
 

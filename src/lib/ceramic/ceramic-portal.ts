@@ -277,7 +277,7 @@ export class CeramicPortal implements ICeramicPortal, ICeramicPortal {
     }
 
     tileDocumentToDisintComment<T>(document: TileDocument): DisintComment<T> {
-        const comment = new DisintComment<T>(null as any);
+        const comment = new DisintComment<T>();
         comment.id = document.id.toString();
         comment.cid = document.id.cid.toString();
         comment.controllers = document.controllers;

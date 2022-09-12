@@ -2,8 +2,13 @@ import { DisintCommentMetadata } from "./Metadata";
 
 export class DisintComment<T> {
 
-    constructor(content: T) {
-        this.content = content;
+    constructor(obj:any = null) {
+        Object.assign(this, obj);
+
+        this.allCommitIds = this.allCommitIds || [];
+        this.childrenIds = this.childrenIds || [];
+        this.controllers = this.controllers || [];
+        this.parentIds = this.parentIds || [];
     }
     id: string;
     cid: string;
@@ -20,15 +25,4 @@ export class DisintComment<T> {
 
     content: T;
 
-    static from(obj: any): DisintComment<any> {
-        let comment = new DisintComment<any>(null);
-        Object.assign(comment, obj);
-
-        comment.allCommitIds = comment.allCommitIds || [];
-        comment.childrenIds = comment.childrenIds || [];
-        comment.controllers = comment.controllers || [];
-        comment.parentIds = comment.parentIds || [];
-
-        return comment;
-    }
 }
