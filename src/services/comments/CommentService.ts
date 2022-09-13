@@ -6,7 +6,7 @@ let commentService: ICommentService;
 if (process.env.NODE_ENV == "development") {
     commentService = new LocalStorageCommentService();
 } else {
-    throw new Error(`No service defined for ${process.env.NODE_ENV}`);
+    throw new Error(`No comment service defined for ${process.env.NODE_ENV}`);
 }
 
 export {commentService}

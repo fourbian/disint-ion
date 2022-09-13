@@ -8,8 +8,10 @@ import './HomeLayout.css';
 import { MarkdownController } from '../components/markdown/MarkdownController';
 import { debounce, debounceTime, Observable, Subscription, tap } from 'rxjs';
 import { commentService } from '../services/comments/CommentService';
+import { userService } from '../services/users/UserService';
 import { Mimetypes } from '../services/comments/ICommentService';
 import { CommentQuery } from '../models/CommentQuery';
+import { UserProfile } from '../models/UserProfile';
 
 const HomeLayout: React.FC = () => {
 
@@ -18,12 +20,14 @@ const HomeLayout: React.FC = () => {
   const params = useParams<{ commentId: string; }>();
   const parentCommentId = params.commentId || "";
   const query = new CommentQuery({parentId: parentCommentId});
+  let [profile, setProfile] = useState(new UserProfile());
 
   let subscription: Subscription | null = null;
 
   let [markdownController, setMarkdownController] = useState(new MarkdownController());
   
   useEffect(() => {
+    userService.readProfile().then(p => setProfile(p));
     return () => { // onDestroy
       subscription?.unsubscribe();
     }
@@ -76,6 +80,9 @@ const HomeLayout: React.FC = () => {
             <IonTitle size="large">{parentCommentId}</IonTitle>
           </IonToolbar>
         </IonHeader>
+        <div>
+          Avatar: <img src={profile.avatar}></img>
+        </div>
         <MarkdownEditor onMarkdownControllerChange={_ => updateMarkdownController(_)} markdown={markdownController.getMarkdown()} />
         <IonButton onClick={create}>Save</IonButton>
 

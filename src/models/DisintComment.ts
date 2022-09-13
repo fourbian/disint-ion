@@ -15,6 +15,7 @@ export class DisintComment<T> {
     allCommitIds: string[];
     commitId: string;
     tipCid: string;
+    userId: string;
     controllers: string[];
     mimetype: string;
 
