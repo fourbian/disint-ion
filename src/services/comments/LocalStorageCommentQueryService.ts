@@ -4,7 +4,7 @@ import { ICommentQueryService } from "./ICommentQueryService";
 
 export class LocalStorageCommentQueryService implements ICommentQueryService {
     private load(): DisintComment<any>[] {
-        const dbString = localStorage.getItem('disint.db');
+        const dbString = localStorage.getItem('disint.db.comments');
         const comments = dbString ? JSON.parse(dbString as string) : [];
         return comments.map((c: any) => new DisintComment(c));
     }

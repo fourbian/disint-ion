@@ -12,6 +12,7 @@ import { userService } from '../services/users/UserService';
 import { Mimetypes } from '../services/comments/ICommentService';
 import { CommentQuery } from '../models/CommentQuery';
 import { UserProfile } from '../models/UserProfile';
+import { FollowingUsers } from '../components/users/FollowingUsers';
 
 const HomeLayout: React.FC = () => {
 
@@ -70,6 +71,9 @@ const HomeLayout: React.FC = () => {
           <IonButtons slot="start">
             <IonMenuButton />
           </IonButtons>
+          <IonButtons slot="end">
+            <IonMenuButton menu="end" />
+          </IonButtons>
           <IonTitle>{parentCommentId}</IonTitle>
         </IonToolbar>
       </IonHeader>
@@ -86,6 +90,7 @@ const HomeLayout: React.FC = () => {
         <MarkdownEditor onMarkdownControllerChange={_ => updateMarkdownController(_)} markdown={markdownController.getMarkdown()} />
         <IonButton onClick={create}>Save</IonButton>
 
+        <FollowingUsers></FollowingUsers>
         <CommentNavigator query={query} ref={commentNavigator}></CommentNavigator>
       </IonContent>
     </IonPage>

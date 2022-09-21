@@ -3,13 +3,16 @@ import { DisintCommentMetadata } from "./Metadata";
 export class DisintComment<T> {
 
     constructor(obj:any = null) {
-        Object.assign(this, obj);
+        if (obj) {
+            Object.assign(this, obj);
 
-        this.allCommitIds = this.allCommitIds || [];
-        this.childrenIds = this.childrenIds || [];
-        this.controllers = this.controllers || [];
-        this.parentIds = this.parentIds || [];
+            this.allCommitIds = this.allCommitIds || [];
+            this.childrenIds = this.childrenIds || [];
+            this.controllers = this.controllers || [];
+            this.parentIds = this.parentIds || [];
+        }
     }
+    
     id: string;
     cid: string;
     allCommitIds: string[];

@@ -1,4 +1,6 @@
 import {
+  IonAccordion,
+  IonAccordionGroup,
   IonContent,
   IonIcon,
   IonItem,
@@ -8,8 +10,6 @@ import {
   IonMenu,
   IonMenuToggle,
   IonNote,
-  IonAccordionGroup,
-  IonAccordion
 } from '@ionic/react';
 
 import { useLocation } from 'react-router-dom';
@@ -18,9 +18,12 @@ import './Menu.css';
 import { CeramicPortal } from '../lib/ceramic/ceramic-portal';
 import config from '../config.json'
 import { useState } from 'react';
+import { DevUsers } from './dev/DevUsers';
+import { FollowingUsers } from './users/FollowingUsers';
+import { PublishedUsers } from './users/PublishedUsers';
 
 
-const Menu: React.FC = () => {
+const Menu2: React.FC = () => {
   const location = useLocation();
   const [loginName, setLoginName] = useState("");
   const [loginAddress, setLoginAddress] = useState("");
@@ -36,67 +39,71 @@ const Menu: React.FC = () => {
 
   }
 
-  // TODO: resizable: https://codepen.io/liamdebeasi/pen/KKdodjd
   return (
-    <IonMenu contentId="main" type="overlay" side="start">
+    <IonMenu contentId="main" type="overlay" side="end">
       <IonContent>
-        <IonList id="inbox-list">
-          <IonListHeader>Inbox</IonListHeader>
-          <IonNote>hi@ionicframework.com</IonNote>
-          <IonMenuToggle autoHide={false}>
-            <IonItem className={location.pathname === "/page/Inbox" ? 'selected' : ''} routerLink="/page/Inbox" routerDirection="none" lines="none" detail={false}>
-              <IonIcon slot="start" icon={homeOutline} />
-              <IonLabel>Home</IonLabel>
-            </IonItem>
-          </IonMenuToggle>
-          <IonItem lines="none" detail={false} onClick={connectWallet} button text-wrap>
-            <IonIcon slot="start" icon={personOutline} />
-            <IonLabel>
-              Connect Wallet
-              <p>
-                {loginName} - {loginAddress}
-              </p>
-            </IonLabel>
-          </IonItem>
-        </IonList>
-        <IonAccordionGroup>
-          <IonAccordion value="first">
+      <IonAccordionGroup>
+          <IonAccordion value="DevUsers">
             <IonItem slot="header" color="light">
-              <IonLabel>Table of Contents</IonLabel>
+              <IonLabel>Dev - Users</IonLabel>
+            </IonItem>
+            <div className="ion-padding" slot="content">
+            <DevUsers></DevUsers>
+            </div>
+          </IonAccordion>
+          <IonAccordion value="QuickSearch">
+            <IonItem slot="header" color="light">
+              <IonLabel>Quick Search</IonLabel>
             </IonItem>
             <div className="ion-padding" slot="content">
             Table of Contents
             </div>
           </IonAccordion>
-          <IonAccordion value="second">
+          <IonAccordion value="RelatedItems">
             <IonItem slot="header" color="light">
-              <IonLabel>Saved Items</IonLabel>
+              <IonLabel>Related Items</IonLabel>
             </IonItem>
             <div className="ion-padding" slot="content">
             Saved Items
             </div>
           </IonAccordion>
-          <IonAccordion value="third">
+          <IonAccordion value="Quality">
             <IonItem slot="header" color="light">
-              <IonLabel>Profile and Settings</IonLabel>
+              <IonLabel>Quality</IonLabel>
+            </IonItem>
+            <div className="ion-padding" slot="content">
+            Profile and Settings
+            </div>
+          </IonAccordion>
+          <IonAccordion value="FollowingUsers">
+            <IonItem slot="header" color="light">
+              <IonLabel>Following Users</IonLabel>
+            </IonItem>
+            <div className="ion-padding" slot="content">
+            <FollowingUsers></FollowingUsers>
+            </div>
+          </IonAccordion>
+          <IonAccordion value="PublishedUsers">
+            <IonItem slot="header" color="light">
+              <IonLabel>Published Users</IonLabel>
+            </IonItem>
+            <div className="ion-padding" slot="content">
+            <PublishedUsers></PublishedUsers>
+            </div>
+          </IonAccordion>
+          <IonAccordion value="PublishedComments">
+            <IonItem slot="header" color="light">
+              <IonLabel>Published Comments</IonLabel>
             </IonItem>
             <div className="ion-padding" slot="content">
             Profile and Settings
             </div>
           </IonAccordion>
         </IonAccordionGroup>
-        {/*<IonList id="labels-list">
-          <IonListHeader>Labels</IonListHeader>
-          {labels.map((label, index) => (
-            <IonItem lines="none" key={index}>
-              <IonIcon slot="start" icon={bookmarkOutline} />
-              <IonLabel>{label}</IonLabel>
-            </IonItem>
-          ))}
-          </IonList>*/}
+
       </IonContent>
     </IonMenu>
   );
 };
 
-export default Menu;
+export default Menu2;

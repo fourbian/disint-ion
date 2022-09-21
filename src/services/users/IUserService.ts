@@ -5,4 +5,7 @@ export interface IUserService {
     authenticate(): Promise<UserProfile>;
     readProfile(): Promise<UserProfile>;
     updateProfile(profile: UserProfile): Promise<UserProfile>;
+    publishedUsers() : Promise<UserProfile[]>;
+    followingUsers() : Promise<UserProfile[]>;
+
 }

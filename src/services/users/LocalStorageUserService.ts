@@ -4,10 +4,29 @@ import { IUserService } from "./IUserService";
 export class LocalStorageUserService implements IUserService{
     private userProfile: UserProfile;
     private _isAuthenticated: boolean = true;
+    private users: UserProfile[] = this.load();
 
-    // don't use this
+    private load(): UserProfile[] {
+        const dbString = localStorage.getItem('disint.db.users');
+        const users = dbString ? JSON.parse(dbString as string) : [];
+        return users.map((u: any) => new UserProfile(u));
+    }
+
+    //
+    // DEV ONLY
+    //
+    // don't use this except Dev only
     public setUserProfileDevOnly(userProfile: UserProfile) {
         this.userProfile = userProfile;
+    }
+
+    public async publishedUsers() : Promise<UserProfile[]> {
+        return this.load();
+    }
+
+    public async followingUsers() : Promise<UserProfile[]> {
+        const followingUserIds = this.userProfile.followingUserIds || [];
+        return this.load().filter(u => followingUserIds.includes(u.userId));
     }
 
     isAuthenticated(): boolean {
@@ -33,10 +52,20 @@ export class LocalStorageUserService implements IUserService{
     }
 
     async updateProfile(profile: UserProfile): Promise<UserProfile> {
+
+        this.users = this.load();
+        
         this.userProfile.avatar = profile.avatar;
         this.userProfile.username = profile.username;
 
-        localStorage.setItem(this.userProfile.userId, JSON.stringify(this.userProfile));
+        let user = this.users.filter(u => u.userId == this.userProfile.userId)[0];
+        if (user) {
+            Object.assign(user, this.userProfile);
+        } else {
+            this.users.push(this.userProfile)
+        }
+
+        localStorage.setItem('disint.db.users', JSON.stringify(this.users));
 
         return this.userProfile;
     }

@@ -30,7 +30,7 @@ export class LocalStorageCommentService implements ICommentService {
             alert("Comment storage as reached 1MB of its 5MB limit");
         }
 
-        localStorage.setItem('disint.db', commentsString);
+        localStorage.setItem('disint.db.comments', commentsString);
     }
 
 }
