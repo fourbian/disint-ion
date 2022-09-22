@@ -76,14 +76,6 @@ const Menu: React.FC = () => {
             Saved Items
             </div>
           </IonAccordion>
-          <IonAccordion value="third">
-            <IonItem slot="header" color="light">
-              <IonLabel>Profile and Settings</IonLabel>
-            </IonItem>
-            <div className="ion-padding" slot="content">
-            Profile and Settings
-            </div>
-          </IonAccordion>
         </IonAccordionGroup>
         {/*<IonList id="labels-list">
           <IonListHeader>Labels</IonListHeader>

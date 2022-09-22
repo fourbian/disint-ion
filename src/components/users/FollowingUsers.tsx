@@ -18,16 +18,16 @@ import { MarkdownController } from "../markdown/MarkdownController";
 import { MarkdownEditor } from "../markdown/MarkdownEditor";
 import { userService } from '../../services/users/UserService';
 import { UserProfile } from '../../models/UserProfile';
+import { UserProfileComponent } from './UserProfileComponent';
 
-class FollowingUserProps {
+class FollowingUsersProps {
 }
 
-class FollowingUserState {
+class FollowingUsersState {
   public users: UserProfile[] = []
 }
 
-export class FollowingUsers extends React.Component<FollowingUserProps, FollowingUserState> {
-  markdownController: MarkdownController = new MarkdownController();
+export class FollowingUsers extends React.Component<FollowingUsersProps, FollowingUsersState> {
   
 
   async componentDidMount() {
@@ -37,12 +37,10 @@ export class FollowingUsers extends React.Component<FollowingUserProps, Followin
   }
 
   render() {
-    return <div className="comment-hover" >
+    return <div>
       {
         this.state?.users.map(u => 
-          <div>
-            {u.username}
-          </div>
+          <UserProfileComponent user={u}></UserProfileComponent>
       )}
     </div>
   }

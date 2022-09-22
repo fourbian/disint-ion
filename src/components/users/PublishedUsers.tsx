@@ -18,6 +18,7 @@ import { MarkdownController } from "../markdown/MarkdownController";
 import { MarkdownEditor } from "../markdown/MarkdownEditor";
 import { userService } from '../../services/users/UserService';
 import { UserProfile } from '../../models/UserProfile';
+import { UserProfileComponent } from './UserProfileComponent';
 
 class PublishedUserProps {
 }
@@ -27,7 +28,6 @@ class PublishedUserState {
 }
 
 export class PublishedUsers extends React.Component<PublishedUserProps, PublishedUserState> {
-  markdownController: MarkdownController = new MarkdownController();
   
 
   async componentDidMount() {
@@ -37,13 +37,11 @@ export class PublishedUsers extends React.Component<PublishedUserProps, Publishe
   }
 
   render() {
-    return <div className="comment-hover" >
+    return <div>
       {
         this.state?.users.map(u => 
-          <div>
-            {u.username}
-          </div>
-      )}
+          <UserProfileComponent user={u}></UserProfileComponent>
+        )}
     </div>
   }
 } 

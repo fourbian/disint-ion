@@ -99,6 +99,23 @@ const Menu2: React.FC = () => {
             Profile and Settings
             </div>
           </IonAccordion>
+          <IonAccordion value="Profile">
+            <IonItem slot="header" color="light">
+              <IonLabel>Profile</IonLabel>
+            </IonItem>
+            <div className="ion-padding" slot="content">
+            Profile
+            </div>
+          </IonAccordion>
+          <IonAccordion value="Settings">
+            <IonItem slot="header" color="light">
+              <IonLabel>Settings</IonLabel>
+            </IonItem>
+            <div className="ion-padding" slot="content">
+            Settings
+            </div>
+          </IonAccordion>
+
         </IonAccordionGroup>
 
       </IonContent>
