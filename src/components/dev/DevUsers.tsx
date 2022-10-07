@@ -20,20 +20,27 @@ import { MarkdownController } from "../markdown/MarkdownController";
 import { MarkdownEditor } from "../markdown/MarkdownEditor";
 import { userService } from '../../services/users/UserService';
 import { CommonModal } from '../shared/CommonModal';
+import { DevUserForm } from './DevUserForm';
+import { DevUserModel } from '../../models/DevUserModel';
+import { UserProfile } from '../../models/UserProfile';
+import { UserProfileComponent } from '../users/UserProfileComponent';
 
 export class DevUsersState {
-  public name: string = "";
+  devUserModalModel: DevUserModel = new DevUserModel();
+  users: UserProfile[] = [];
 }
+
 export class DevUsersProps {
 }
 
 export class DevUsers extends React.Component<DevUsersProps, DevUsersState> {
 
-  onInput(e: CustomEvent<InputEvent>) {
-    const el = e.target as HTMLInputElement;
-    this.setState({
-      [el.name] : el.value
-    } as any);  
+
+  componentDidMount() {
+    userService.publishedUsers().then(users => {
+      this.setState({ users });
+    });
+    
   }
 
   async onCancel(): Promise<boolean> {
@@ -46,22 +53,23 @@ export class DevUsers extends React.Component<DevUsersProps, DevUsersState> {
     return true;
   }
 
+  onModalStateChange(devUserModel: DevUserModel) {
+    this.setState({ devUserModalModel : devUserModel });
+  }
 
   render() {
 
     return <div className="comment-hover" >
       <IonButton id="modal12345" expand="block">
-        Openn
+        New
       </IonButton>
 
+      {(this.state?.users || []).map(u => {
+        return <UserProfileComponent user={u} key={u.userId}></UserProfileComponent>
+      })}
+
       <CommonModal triggerId="modal12345" onCancel={() => this.onCancel()} onConfirm={() => this.onConfirm()} title="Heyo">
-
-        {/*TODO: move this to DevUserForm component */}
-        <IonItem>
-          <IonLabel position="stacked">Enter your name</IonLabel>
-          <IonInput type="text" placeholder="Your name" name="name" value={this.state?.name} onIonInput={e => this.onInput(e)} />
-        </IonItem>
-
+        <DevUserForm onStateChange={state => this.onModalStateChange(state)} value={this.state?.devUserModalModel}></DevUserForm>
       </CommonModal>
     </div>
   }
