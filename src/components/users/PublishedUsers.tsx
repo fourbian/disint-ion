@@ -37,11 +37,8 @@ export class PublishedUsers extends React.Component<PublishedUserProps, Publishe
   }
 
   render() {
-    return <div>
-      {
-        this.state?.users.map(u => 
-          <UserProfileComponent user={u}></UserProfileComponent>
-        )}
-    </div>
+    return (this.state?.users || []).map(u => 
+      <UserProfileComponent user={u} key={u.userId}></UserProfileComponent>
+    )
   }
 } 

@@ -13,6 +13,8 @@ import { Mimetypes } from '../services/comments/ICommentService';
 import { CommentQuery } from '../models/CommentQuery';
 import { UserProfile } from '../models/UserProfile';
 import { FollowingUsers } from '../components/users/FollowingUsers';
+import { Avatar } from '../components/users/Avatar';
+import { UserProfileComponent } from '../components/users/UserProfileComponent';
 
 const HomeLayout: React.FC = () => {
 
@@ -84,9 +86,7 @@ const HomeLayout: React.FC = () => {
             <IonTitle size="large">{parentCommentId}</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <div>
-          Avatar: <img src={profile.avatar}></img>
-        </div>
+        <UserProfileComponent user={profile}></UserProfileComponent>
         <MarkdownEditor onMarkdownControllerChange={_ => updateMarkdownController(_)} markdown={markdownController.getMarkdown()} />
         <IonButton onClick={create}>Save</IonButton>
 

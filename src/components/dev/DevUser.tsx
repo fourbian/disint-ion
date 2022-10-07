@@ -9,30 +9,33 @@ import {
   IonMenuToggle,
   IonNote,
   IonAccordionGroup,
-  IonAccordion
+  IonAccordion,
+  IonInput
 } from '@ionic/react';
 
 import React from "react";
-import './Avatar.css';
 import { DisintComment } from "../../models/DisintComment";
 import { MarkdownController } from "../markdown/MarkdownController";
 import { MarkdownEditor } from "../markdown/MarkdownEditor";
 import { userService } from '../../services/users/UserService';
-import { UserProfile } from '../../models/UserProfile'
+import { UserProfile } from '../../models/UserProfile';
+import { UserProfileComponent } from '../users/UserProfileComponent';
 
-class AvatarProps {
-  public url: string = "";
+export class DevUserProps {
+  public userProfile: UserProfile;
 }
 
-class AvatarState {
+export class DevUserState {
+  public name: string = "";
 }
 
-export class Avatar extends React.Component<AvatarProps, AvatarState> {
-  
+export class DevUser extends React.Component<DevUserProps, DevUserState> {
+
   render() {
+
     return (
-         this.props.url && <img className="avatar" src={this.props.url}></img> || null
-        
+      <UserProfileComponent user={this.props.userProfile}>
+      </UserProfileComponent>
     )
   }
 } 
