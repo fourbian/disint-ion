@@ -9598,10 +9598,10 @@
   "resolved" "https://registry.npmjs.org/jmespath/-/jmespath-0.15.0.tgz"
   "version" "0.15.0"
 
-"joi@^17.2.1":
-  "integrity" "sha512-OX5dG6DTbcr/kbMFj0KGYxuew69HPcAE3K/sZpEV2nP6e/j/C0HV+HNiBPCASxdx5T7DMoa0s8UeHWMnb6n2zw=="
-  "resolved" "https://registry.npmjs.org/joi/-/joi-17.6.0.tgz"
-  "version" "17.6.0"
+"joi@^17.2.1", "joi@^17.6.2":
+  "integrity" "sha512-+gqqdh1xc1wb+Lor0J9toqgeReyDOCqOdG8QSdRcEvwrcRiFQZneUCGKjFjuyBWUb3uaFOgY56yMaZ5FIc+H4w=="
+  "resolved" "https://registry.npmjs.org/joi/-/joi-17.6.2.tgz"
+  "version" "17.6.2"
   dependencies:
     "@hapi/hoek" "^9.0.0"
     "@hapi/topo" "^5.0.0"

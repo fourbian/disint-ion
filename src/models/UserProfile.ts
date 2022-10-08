@@ -1,3 +1,5 @@
+import Joi from 'joi';
+
 export class UserProfile {
 
     constructor(obj:any = null) {
@@ -16,3 +18,11 @@ export class UserProfile {
 
     followingUserIds: string[] = [];
 }
+
+export const userProfileSchema: Joi.ObjectSchema<UserProfile> = Joi.object({
+    username: Joi.string().required(),
+    avatar: Joi.string().uri(),
+    userId: Joi.string().min(20).max(40).required(),
+
+    followingUserIds: Joi.array()
+});

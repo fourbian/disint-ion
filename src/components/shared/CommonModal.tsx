@@ -26,12 +26,12 @@ import { MarkdownEditor } from "../markdown/MarkdownEditor";
 import { userService } from '../../services/users/UserService';
 import { UserProfile } from '../../models/UserProfile';
 import { UserProfileComponent } from '../users/UserProfileComponent';
-import { modalController, OverlayEventDetail } from '@ionic/core';
+import { OverlayEventDetail } from '@ionic/core';
 
 export class CommonModalProps {
   onCancel: () => Promise<boolean>;
   onConfirm: () => Promise<boolean>;
-  triggerId: string;
+  triggerId?: string;
   title: string;
 }
 
@@ -40,7 +40,13 @@ export class CommonModalState {
 }
 
 export class CommonModal extends React.Component<CommonModalProps, CommonModalState> {
+  public modal: React.RefObject<HTMLIonModalElement>;
   
+  constructor(props: CommonModalProps) {
+    super(props);
+    this.modal = React.createRef();
+  }
+
   componentDidMount() {
     this.setState(new CommonModalState());
   }
@@ -51,19 +57,23 @@ export class CommonModal extends React.Component<CommonModalProps, CommonModalSt
 
   async dismiss() {
     let shouldDismiss = await this.props.onCancel();
-    if (shouldDismiss) modalController.dismiss();
+    if (shouldDismiss) this.modal.current?.dismiss();
   }
 
   
   async confirm() {
     let shouldConfirm = await this.props.onConfirm();
-    if (shouldConfirm) modalController.dismiss();
+    if (shouldConfirm) this.modal.current?.dismiss();
+  }
+
+  public present() {
+    this.modal.current?.present();
   }
 
   render() {
     return (
       <div>
-        <IonModal trigger={this.props.triggerId} onWillDismiss={(e) => this.onWillDismiss(e)}>
+        <IonModal ref={this.modal} trigger={this.props.triggerId} onWillDismiss={(e) => this.onWillDismiss(e)}>
           <IonHeader>
             <IonToolbar>
               <IonButtons slot="start">

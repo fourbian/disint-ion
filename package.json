@@ -38,6 +38,7 @@
     "ionicons": "^5.4.0",
     "ipfs": "^0.62.2",
     "ipfs-core": "^0.14.2",
+    "joi": "^17.6.2",
     "key-did-resolver": "^2.0.0",
     "os-browserify": "^0.3.0",
     "prosemirror-model": "^1.16.1",
