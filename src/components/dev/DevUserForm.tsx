@@ -25,44 +25,31 @@ import { UserProfileComponent } from '../users/UserProfileComponent';
 import { FormState } from '../../models/FormState';
 
 export class DevUserFormProps {
-  public onStateChange: (devUserFormState: DevUserFormState) => void;
+  public onStateChange: (devUserFormState: FormState<UserProfile>) => void;
   public value: UserProfile = new UserProfile();
   public schema: Joi.ObjectSchema<UserProfile>;
 }
 
-export class DevUserFormState extends FormState {
-  public userProfile: UserProfile = new UserProfile();
-}
-
-export class DevUserForm extends React.Component<DevUserFormProps, DevUserFormState> {
+export class DevUserForm extends React.Component<DevUserFormProps, FormState<UserProfile>> {
 
   componentDidMount() {
-    this.setStateHelper({ userProfile: this.props.value, validation: undefined as any });
+    this.setStateHelper(FormState.from<UserProfile>(this.props.value, this.props.schema));
   }
 
-  setStateHelper(state: DevUserFormState) {
-    let newState = Object.assign(new DevUserFormState(), this.state, state);
-    let { error, value } = this.props.schema.validate(state.userProfile, { abortEarly: false });
-    if (value) {
-      newState.userProfile = value;
-      newState.validation = error;
-      // TODO: make this an extension/helper somewhere, maybe a helper class that DevUserFormState can inherit from that
-      // also has validation and errors attributes?
-      newState.errors = FormState.KeyValuErrors(error as any);
-    }
-
-    this.setState(newState);
-    this.props.onStateChange(newState);
+  setStateHelper(state: FormState<UserProfile>) {
+    let newFormState = new FormState<UserProfile>(state).validate(this.props.schema);
+    this.setState(newFormState);
+    this.props.onStateChange(newFormState);
   }
 
   onInput(e: CustomEvent<InputEvent>) {
     const el = e.target as HTMLInputElement;
-    const newUserProfile = new UserProfile(this.state?.userProfile);
+    const newUserProfile = new UserProfile(this.state?.form);
     (newUserProfile as any)[el.name] = el.value;
     if (el.name == "username") {
       newUserProfile.avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(el.value)}`
     }
-    this.setStateHelper({ userProfile: newUserProfile, validation: undefined });
+    this.setStateHelper(FormState.from<UserProfile>(newUserProfile, this.props.schema));
   }
 
   render() {
@@ -82,20 +69,20 @@ export class DevUserForm extends React.Component<DevUserFormProps, DevUserFormSt
         {errorItem}
         <IonItem className={errors.get('userId') ? "ion-invalid" : ""}>
           <IonLabel position="stacked">Enter your id</IonLabel>
-          <IonInput type="text" placeholder="Id" name="userId" value={this.state?.userProfile?.userId} onIonInput={e => this.onInput(e)} />
+          <IonInput type="text" placeholder="Id" name="userId" value={this.state?.form?.userId} onIonInput={e => this.onInput(e)} />
           <span slot="error">{errors.get('userId')}</span>
         </IonItem >
         <IonItem className={errors.get('username') ? "ion-invalid" : ""}>
           <IonLabel position="stacked">Enter your username</IonLabel>
-          <IonInput type="text" placeholder="Username" name="username" value={this.state?.userProfile?.username} onIonInput={e => this.onInput(e)} />
+          <IonInput type="text" placeholder="Username" name="username" value={this.state?.form?.username} onIonInput={e => this.onInput(e)} />
           <span slot="error">{errors.get('username')}</span>
         </IonItem>
         <IonItem className={errors.get('avatar') ? "ion-invalid" : ""}>
           <IonAvatar slot="start">
-            <img src={this.state?.userProfile?.avatar} />
+            <img src={this.state?.form?.avatar} />
           </IonAvatar>
           <IonLabel position="stacked">Enter your avatar</IonLabel>
-          <IonInput type="text" placeholder="Avatar" name="avatar" value={this.state?.userProfile?.avatar} onIonInput={e => this.onInput(e)} />
+          <IonInput type="text" placeholder="Avatar" name="avatar" value={this.state?.form?.avatar} onIonInput={e => this.onInput(e)} />
           <span slot="error">{errors.get('avatar')}</span>
         </IonItem>
       </IonList>

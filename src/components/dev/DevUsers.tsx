@@ -22,12 +22,13 @@ import { MarkdownController } from "../markdown/MarkdownController";
 import { MarkdownEditor } from "../markdown/MarkdownEditor";
 import { userService } from '../../services/users/UserService';
 import { CommonModal } from '../shared/CommonModal';
-import { DevUserForm, DevUserFormState } from './DevUserForm';
+import { DevUserForm } from './DevUserForm';
 import { UserProfile, userProfileSchema } from '../../models/UserProfile';
 import { UserProfileComponent } from '../users/UserProfileComponent';
 import { modalController } from '@ionic/core';
 import { join } from 'path';
 import { LocalStorageUserService } from '../../services/users/LocalStorageUserService';
+import { FormState } from '../../models/FormState';
 
 export class DevUsersState {
   modalUserProfile: UserProfile = new UserProfile();
@@ -92,9 +93,9 @@ export class DevUsers extends React.Component<DevUsersProps, DevUsersState> {
     this.commonModal.current?.present();
   }
 
-  onModalStateChange(devUserFormState: DevUserFormState) {
+  onModalStateChange(devUserFormState: FormState<UserProfile>) {
     this.setState({
-      modalUserProfile: devUserFormState.userProfile,
+      modalUserProfile: devUserFormState.form,
       modalHasErrors: !!devUserFormState.errors?.size
     });
   }
