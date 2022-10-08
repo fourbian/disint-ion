@@ -22,6 +22,7 @@ import { MarkdownEditor } from "../markdown/MarkdownEditor";
 import { userService } from '../../services/users/UserService';
 import { UserProfile } from '../../models/UserProfile';
 import { UserProfileComponent } from '../users/UserProfileComponent';
+import { FormState } from '../../models/FormState';
 
 export class DevUserFormProps {
   public onStateChange: (devUserFormState: DevUserFormState) => void;
@@ -29,10 +30,8 @@ export class DevUserFormProps {
   public schema: Joi.ObjectSchema<UserProfile>;
 }
 
-export class DevUserFormState {
+export class DevUserFormState extends FormState {
   public userProfile: UserProfile = new UserProfile();
-  public validation?: Joi.ValidationError;
-  public errors?: Map<string, string> = new Map<string, string>();
 }
 
 export class DevUserForm extends React.Component<DevUserFormProps, DevUserFormState> {
@@ -49,12 +48,7 @@ export class DevUserForm extends React.Component<DevUserFormProps, DevUserFormSt
       newState.validation = error;
       // TODO: make this an extension/helper somewhere, maybe a helper class that DevUserFormState can inherit from that
       // also has validation and errors attributes?
-      newState.errors = (newState.validation?.details || []).reduce((previousValue, currentValue) => {
-        if (currentValue.context?.key) {
-          previousValue.set(currentValue.context?.key, currentValue.message);
-        }
-        return previousValue;
-      }, new Map<string, string>());
+      newState.errors = FormState.KeyValuErrors(error as any);
     }
 
     this.setState(newState);
@@ -73,29 +67,36 @@ export class DevUserForm extends React.Component<DevUserFormProps, DevUserFormSt
 
   render() {
 
+    let errorItem = null;
+    let hasErrors = !!this.state?.errors?.size;
+    let errors = this.state?.errors || new Map<string, string>();
+    if (hasErrors) {
+      errorItem = <IonItem className={this.state?.errors?.size ? "ion-invalid" : ""}>
+        <IonLabel>{this.state?.validation?.message}</IonLabel>
+        <span slot="error">{this.state?.validation?.message}</span>
+      </IonItem>;
+    }
+    
     return (
       <IonList>
-        <IonItem className={this.state?.errors?.size ? "ion-invalid" : ""}>
-          <IonLabel>{this.state?.validation?.message}</IonLabel>
-          <span slot="error">{this.state?.validation?.message}</span>
-        </IonItem>
-        <IonItem className={this.state?.errors?.get('userId') ? "ion-invalid" : ""}>
+        {errorItem}
+        <IonItem className={errors.get('userId') ? "ion-invalid" : ""}>
           <IonLabel position="stacked">Enter your id</IonLabel>
           <IonInput type="text" placeholder="Id" name="userId" value={this.state?.userProfile?.userId} onIonInput={e => this.onInput(e)} />
-          <span slot="error">{this.state?.errors?.get('userId')}</span>
+          <span slot="error">{errors.get('userId')}</span>
         </IonItem >
-        <IonItem className={this.state?.errors?.get('username') ? "ion-invalid" : ""}>
+        <IonItem className={errors.get('username') ? "ion-invalid" : ""}>
           <IonLabel position="stacked">Enter your username</IonLabel>
           <IonInput type="text" placeholder="Username" name="username" value={this.state?.userProfile?.username} onIonInput={e => this.onInput(e)} />
-          <span slot="error">{this.state?.errors?.get('username')}</span>
+          <span slot="error">{errors.get('username')}</span>
         </IonItem>
-        <IonItem className={this.state?.errors?.get('avatar') ? "ion-invalid" : ""}>
+        <IonItem className={errors.get('avatar') ? "ion-invalid" : ""}>
           <IonAvatar slot="start">
             <img src={this.state?.userProfile?.avatar} />
           </IonAvatar>
           <IonLabel position="stacked">Enter your avatar</IonLabel>
           <IonInput type="text" placeholder="Avatar" name="avatar" value={this.state?.userProfile?.avatar} onIonInput={e => this.onInput(e)} />
-          <span slot="error">{this.state?.errors?.get('avatar')}</span>
+          <span slot="error">{errors.get('avatar')}</span>
         </IonItem>
       </IonList>
     )

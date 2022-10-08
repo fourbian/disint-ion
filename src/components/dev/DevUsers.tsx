@@ -27,11 +27,13 @@ import { UserProfile, userProfileSchema } from '../../models/UserProfile';
 import { UserProfileComponent } from '../users/UserProfileComponent';
 import { modalController } from '@ionic/core';
 import { join } from 'path';
+import { LocalStorageUserService } from '../../services/users/LocalStorageUserService';
 
 export class DevUsersState {
   modalUserProfile: UserProfile = new UserProfile();
   users: UserProfile[] = [];
   modalTitle: string = "";
+  modalHasErrors: boolean = false;
 }
 
 export class DevUsersProps {
@@ -50,17 +52,27 @@ export class DevUsers extends React.Component<DevUsersProps, DevUsersState> {
     userService.publishedUsers().then(users => {
       this.setState({ users });
     });
-    
+
   }
 
   async onCancel(): Promise<boolean> {
-    //alert("cancel " + JSON.stringify(this.state));
     return true;
   }
 
-  async onConfirm() : Promise<boolean> {
-    //alert("confirm " + JSON.stringify(this.state));
-    return true;
+  async onConfirm(): Promise<boolean> {
+    if (this.state.modalHasErrors) {
+      alert("please fix errors");
+      return false;
+    } else {
+      let localUserService = userService as LocalStorageUserService;
+      let userProfile = this.state.modalUserProfile;
+      localUserService.setUserProfileDevOnly(userProfile);
+      localUserService.readProfile() // in case user has updated their avatar or username since initialized
+          .then(u => {
+              userService.updateProfile(u);
+          })
+      return true;
+    }
   }
 
   onEditUser(userProfile: UserProfile) {
@@ -81,19 +93,22 @@ export class DevUsers extends React.Component<DevUsersProps, DevUsersState> {
   }
 
   onModalStateChange(devUserFormState: DevUserFormState) {
-    this.setState({ modalUserProfile : devUserFormState.userProfile });
+    this.setState({
+      modalUserProfile: devUserFormState.userProfile,
+      modalHasErrors: !!devUserFormState.errors?.size
+    });
   }
 
   render() {
 
-    return <div className="comment-hover" >
+    return <div>
       <IonButton expand="block" onClick={() => this.onNewUser()}>
         New
       </IonButton>
 
       {(this.state?.users || []).map(u => {
         return (
-          <div onClick={(e) => this.onEditUser(u) } key={u.userId}>
+          <div className="comment-hover" onClick={(e) => this.onEditUser(u)} key={u.userId}>
             <UserProfileComponent user={u} ></UserProfileComponent>
           </div>
         )
