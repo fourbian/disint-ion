@@ -15,6 +15,10 @@ import { UserProfile } from '../models/UserProfile';
 import { FollowingUsers } from '../components/users/FollowingUsers';
 import { Avatar } from '../components/users/Avatar';
 import { UserProfileComponent } from '../components/users/UserProfileComponent';
+import { CommentStandard } from '../components/comments/CommentStandard';
+import { PopoverButton } from '../components/shared/PopoverButton';
+import { popoverController } from '@ionic/core';
+import { CommentBrief } from '../components/comments/CommentBrief';
 
 const HomeLayout: React.FC = () => {
 
@@ -24,6 +28,7 @@ const HomeLayout: React.FC = () => {
   const parentCommentId = params.commentId || "";
   const query = new CommentQuery({ parentId: parentCommentId }, userService).mine();
   let [profile, setProfile] = useState(new UserProfile());
+  let [commentView, setCommentView] = useState("CommentBrief");
 
   let subscription: Subscription | null = null;
 
@@ -66,6 +71,12 @@ const HomeLayout: React.FC = () => {
 
   }
 
+  let onSetCommentView = (viewName: string) => {
+    setCommentView(viewName);
+    popoverController.dismiss();
+    // TODO: save view
+  }
+
   return (
     <IonPage>
       <IonHeader>
@@ -93,9 +104,19 @@ const HomeLayout: React.FC = () => {
         <IonButton onClick={create}>Save</IonButton>
 
         <FollowingUsers></FollowingUsers>
-        <CommentNavigator query={query} ref={commentNavigator}></CommentNavigator>
+        {parentCommentId &&
+          <CommentBrief commentId={parentCommentId}></CommentBrief>
+        }
+        <div style={{ display: 'flex', justifyContent: 'right' }}>
+          <PopoverButton label='Select view' >
+            <IonItem button onClick={(e) => onSetCommentView("CommentBrief")} detail={false}>Brief</IonItem>
+            <IonItem button onClick={(e) => onSetCommentView("CommentStandard")} detail={false}>Standard</IonItem>
+          </PopoverButton>
+
+        </div>
+        <CommentNavigator component={commentView} query={query} ref={commentNavigator}></CommentNavigator>
       </IonContent>
-    </IonPage>
+    </IonPage >
   );
 };
 

@@ -5,10 +5,12 @@ import { CommentStandard } from "./CommentStandard";
 import { Link } from "react-router-dom";
 import { commentQueryService } from "../../services/comments/CommentQueryService"
 import { CommentQuery } from "../../models/CommentQuery";
+import { CommentBrief } from "./CommentBrief";
 
 class CommentNavigatorProps {
     query: CommentQuery;
     ref: any;
+    component: string;
 }
 
 class CommentNavigatorState {
@@ -25,7 +27,6 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
     }
 
     async componentDidMount() {
-        await this.loadParentDocument();
         await this.loadComments();
     }
 
@@ -40,32 +41,28 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
         this._loading = false;
     }
 
-    async loadParentDocument() {
-        //this._parentComment = null; //await this.portal.lookupStream(this.props.parentStreamId);
+    commentComponent(comment: DisintComment<any>) {
+        if (this.props.component == "CommentStandard") {
+            return <CommentStandard comment={comment}></CommentStandard>
+        } else if (this.props.component == "CommentBrief") {
+            return <CommentBrief comment={comment}></CommentBrief>
+        } else {
+            return null;
+        }
     }
-
 
     render() {
 
-        let parentComment = this._parentComment &&
-            <div>
-                <h2>Parent</h2>
-                <CommentStandard comment={this._parentComment}></CommentStandard>
-
-            </div>
-
-
         let comments = this.state.comments?.map((c: DisintComment<any>) => {
-            return <Link to={"/comments/" + c.id}>
-                <CommentStandard comment={c} key={c.id}></CommentStandard>
+            return <Link to={"/comments/" + c.id} key={c.id}>
+                {this.commentComponent(c)}
             </Link>
         })
 
         return <div>
-            {parentComment}
-            <h2>
-                Children
-            </h2>
+            <h3>
+                Comments
+            </h3>
             {comments}
         </div>
 

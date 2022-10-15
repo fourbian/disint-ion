@@ -29,6 +29,10 @@ export class LocalStorageCommentService implements ICommentService {
         this.saveComments();
     }
 
+    async load<T>(commentId: string): Promise<DisintComment<T>> {
+        return await this.queryService.load<T>(commentId);
+    }
+
     private saveComments() {
         let commentsString = JSON.stringify(this.comments);
         if (commentsString.length > (1024 * 1024)) {

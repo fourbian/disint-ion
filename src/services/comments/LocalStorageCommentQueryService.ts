@@ -9,7 +9,7 @@ export class LocalStorageCommentQueryService implements ICommentQueryService {
 
     }
 
-    private load(): DisintComment<any>[] {
+    private _loadAllComments(): DisintComment<any>[] {
         const dbString = localStorage.getItem('disint.db.comments');
         const comments = dbString ? JSON.parse(dbString as string) : [];
         return comments.map((c: any) => new DisintComment(c));
@@ -21,7 +21,7 @@ export class LocalStorageCommentQueryService implements ICommentQueryService {
 
         options = await options.wait();
 
-        let comments = this.load();
+        let comments = this._loadAllComments();
         if (options.parentId) {
             const parentId = options.parentId;
             let parentFilter = (c: DisintComment<any>) => {
@@ -35,6 +35,12 @@ export class LocalStorageCommentQueryService implements ICommentQueryService {
             comments = comments.filter(c => options?.userIds.includes(c.userId));
         }
         return comments;
+    }
+
+    // Dev: only
+    public load<T>(commentId: string): DisintComment<T> {
+        let comments = this._loadAllComments();
+        return comments.filter(c => c.id == commentId)[0];
     }
 
 }

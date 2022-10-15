@@ -7,4 +7,6 @@ export class Mimetypes
 
 export interface ICommentService {
     create<T>(content: T, mimetype: string, parentCommentId: string): Promise<void>;
+    load<T>(commentId: string): Promise<DisintComment<T>>;
+
 }
