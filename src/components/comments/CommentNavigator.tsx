@@ -33,7 +33,7 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
         if (this._loading) return
         this._loading = true;
 
-        const comments = await commentQueryService.mine(this.props.query);
+        const comments = await commentQueryService.query(this.props.query);
 
         this.setState({ comments });
 

@@ -55,33 +55,35 @@ export class DevUsers extends React.Component<DevUsersProps, DevUsersState> {
   }
 
   componentDidMount() {
+    this.updateUserState();
+  }
+
+  updateUserState() {
     userService.publishedUsers().then(users => {
       this.setState({ users });
     });
-
   }
 
-  async onCancel(): Promise<boolean> {
+  async onModalCancelUser(): Promise<boolean> {
     return true;
   }
 
-  async onConfirm(): Promise<boolean> {
+  async onModalConfirmUser(): Promise<boolean> {
     if (this.state.modalHasErrors) {
       alert("please fix errors");
       return false;
     } else {
-      let localUserService = userService as LocalStorageUserService;
-      let userProfile = this.state.modalUserProfile;
-      localUserService.setUserProfileDevOnly(userProfile);
-      localUserService.readProfile() // in case user has updated their avatar or username since initialized
-        .then(u => {
-          userService.updateProfile(u);
-        })
+      let currentUserProfile = (userService as LocalStorageUserService).getLoggedInUser();
+      await (userService as LocalStorageUserService).setUserProfileDevOnly(this.state.modalUserProfile); // memory only
+      await userService.updateProfile(this.state.modalUserProfile); // commit to storage
+      // reset to logged in user
+      await (userService as LocalStorageUserService).setUserProfileDevOnly(currentUserProfile);
+      this.updateUserState();
       return true;
     }
   }
 
-  onEditUser(userProfile: UserProfile) {
+  onEditUserModal(userProfile: UserProfile) {
     this.setState({
       modalUserProfile: userProfile,
       modalTitle: "Edit " + userProfile.username
@@ -90,7 +92,7 @@ export class DevUsers extends React.Component<DevUsersProps, DevUsersState> {
 
   }
 
-  onNewUser() {
+  onNewUserModal() {
     this.setState({
       modalUserProfile: new UserProfile(),
       modalTitle: "New user"
@@ -98,21 +100,23 @@ export class DevUsers extends React.Component<DevUsersProps, DevUsersState> {
     this.commonModal.current?.present();
   }
 
-  onModalStateChange(devUserFormState: FormState<UserProfile>) {
+  onModalUserFormStateChange(devUserFormState: FormState<UserProfile>) {
     this.setState({
       modalUserProfile: devUserFormState.form,
       modalHasErrors: !!devUserFormState.errors?.size
     });
   }
 
-  login(userId: string) {
-    alert(userId);
+  login(user: UserProfile) {
+    let localUserService = userService as LocalStorageUserService;
+    localUserService.setUserProfileDevOnly(user);
+    window.location.reload();
   }
 
   render() {
 
     return <div>
-      <IonButton expand="block" onClick={() => this.onNewUser()}>
+      <IonButton expand="block" onClick={() => this.onNewUserModal()}>
         New
       </IonButton>
 
@@ -120,18 +124,18 @@ export class DevUsers extends React.Component<DevUsersProps, DevUsersState> {
         {(this.state?.users || []).map(u => {
           return (
             // detail='false' to remove the right arrow for iOS devices
-            <IonItem button detail={false}>
-              <UserProfileComponent user={u} onClick={(e) => this.onEditUser(u)} key={u.userId}></UserProfileComponent>
+            <IonItem button detail={false} key={u.userId}>
+              <UserProfileComponent user={u} onClick={(e) => this.onEditUserModal(u)}></UserProfileComponent>
               <PopoverButton>
-                <IonItem button onClick={(e) => { this.login(u.userId); popoverController.dismiss() }} detail={false}>Login</IonItem>
+                <IonItem button onClick={(e) => { this.login(u); popoverController.dismiss() }} detail={false}>Login</IonItem>
               </PopoverButton>
             </IonItem>
           )
         })}
       </IonList>
 
-      <CommonModal ref={this.commonModal} onCancel={() => this.onCancel()} onConfirm={() => this.onConfirm()} title={this.state?.modalTitle}>
-        <DevUserForm schema={userProfileSchema} onStateChange={state => this.onModalStateChange(state)} value={this.state?.modalUserProfile}></DevUserForm>
+      <CommonModal ref={this.commonModal} onCancel={() => this.onModalCancelUser()} onConfirm={() => this.onModalConfirmUser()} title={this.state?.modalTitle}>
+        <DevUserForm schema={userProfileSchema} onStateChange={state => this.onModalUserFormStateChange(state)} value={this.state?.modalUserProfile}></DevUserForm>
       </CommonModal>
     </div>
   }

@@ -18,7 +18,13 @@ export class LocalStorageUserService implements IUserService{
     // don't use this except Dev only
     public setUserProfileDevOnly(userProfile: UserProfile) {
         this.userProfile = userProfile;
+        window.localStorage.setItem("loggedInUserId", this.userProfile.userId);
     }
+    public getLoggedInUser() : UserProfile {
+        const userId = window.localStorage.getItem("loggedInUserId");
+        return this.users.filter(u => u.userId == userId)[0];
+    }
+    // END DEV ONLY
 
     public async publishedUsers() : Promise<UserProfile[]> {
         return this.load();

@@ -3,20 +3,25 @@ import { ICommentService } from "./ICommentService";
 import { v4 as uuidv4 } from 'uuid';
 import { LocalStorageCommentQueryService } from "./LocalStorageCommentQueryService";
 import { CommentQuery } from "../../models/CommentQuery";
+import { IUserService } from "../users/IUserService";
 
 export class LocalStorageCommentService implements ICommentService {
-    queryService = new LocalStorageCommentQueryService();
+    queryService: LocalStorageCommentQueryService;
     comments: DisintComment<any>[] = [];
+    userService: IUserService;
 
-    constructor() {
-        this.queryService.all(new CommentQuery()).then(comments => this.comments = comments);
+    constructor(userService: IUserService) {
+        this.queryService = new LocalStorageCommentQueryService(userService);
+        this.queryService.query(new CommentQuery()).then(comments => this.comments = comments);
+        this.userService = userService;
     }
 
     async create<T>(content: T, mimetype: string, parentCommentId: string = ""): Promise<void> {
-        let comment = new DisintComment<T>({content});
+        let comment = new DisintComment<T>({ content });
         comment.id = uuidv4();
         comment.cid = 'c' + comment.id;
         comment.mimetype = mimetype;
+        comment.userId = (await this.userService.readProfile()).userId;
         if (parentCommentId) comment.parentIds = [parentCommentId];
 
         this.comments.push(comment);

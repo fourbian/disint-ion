@@ -1,4 +1,4 @@
-import { IonButton, IonButtons, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar } from '@ionic/react';
+import { IonButton, IonButtons, IonContent, IonHeader, IonItem, IonMenuButton, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import React, { useEffect, useState } from 'react';
 import { createRef } from 'react';
 import { useParams } from 'react-router';
@@ -22,20 +22,20 @@ const HomeLayout: React.FC = () => {
 
   const params = useParams<{ commentId: string; }>();
   const parentCommentId = params.commentId || "";
-  const query = new CommentQuery({parentId: parentCommentId});
+  const query = new CommentQuery({ parentId: parentCommentId }, userService).mine();
   let [profile, setProfile] = useState(new UserProfile());
 
   let subscription: Subscription | null = null;
 
   let [markdownController, setMarkdownController] = useState(new MarkdownController());
-  
+
   useEffect(() => {
     userService.readProfile().then(p => setProfile(p));
     return () => { // onDestroy
       subscription?.unsubscribe();
     }
   })
-  
+
   let updateMarkdownController = (markdownController: MarkdownController) => {
     setMarkdownController(markdownController);
     if (subscription) subscription.unsubscribe();
@@ -46,7 +46,7 @@ const HomeLayout: React.FC = () => {
         //   console.log("**", markdown)
         // })
       )
-      .subscribe( (markdown: string) => {
+      .subscribe((markdown: string) => {
         console.log("updated markdown:", markdown)
       });
   }
@@ -86,7 +86,9 @@ const HomeLayout: React.FC = () => {
             <IonTitle size="large">{parentCommentId}</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <UserProfileComponent user={profile}></UserProfileComponent>
+        <IonItem lines="none">
+          <UserProfileComponent user={profile}></UserProfileComponent>
+        </IonItem>
         <MarkdownEditor onMarkdownControllerChange={_ => updateMarkdownController(_)} markdown={markdownController.getMarkdown()} />
         <IonButton onClick={create}>Save</IonButton>
 
