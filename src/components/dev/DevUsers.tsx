@@ -12,7 +12,9 @@ import {
   IonAccordion,
   IonInput,
   IonButton,
-  ModalOptions
+  ModalOptions,
+  IonSelect,
+  IonSelectOption
 } from '@ionic/react';
 
 import Joi from "joi";
@@ -29,6 +31,9 @@ import { modalController } from '@ionic/core';
 import { join } from 'path';
 import { LocalStorageUserService } from '../../services/users/LocalStorageUserService';
 import { FormState } from '../../models/FormState';
+import { PopoverButton } from '../shared/PopoverButton';
+import { popoverController } from '@ionic/core';
+import { star } from 'ionicons/icons';
 
 export class DevUsersState {
   modalUserProfile: UserProfile = new UserProfile();
@@ -69,9 +74,9 @@ export class DevUsers extends React.Component<DevUsersProps, DevUsersState> {
       let userProfile = this.state.modalUserProfile;
       localUserService.setUserProfileDevOnly(userProfile);
       localUserService.readProfile() // in case user has updated their avatar or username since initialized
-          .then(u => {
-              userService.updateProfile(u);
-          })
+        .then(u => {
+          userService.updateProfile(u);
+        })
       return true;
     }
   }
@@ -100,6 +105,10 @@ export class DevUsers extends React.Component<DevUsersProps, DevUsersState> {
     });
   }
 
+  login(userId: string) {
+    alert(userId);
+  }
+
   render() {
 
     return <div>
@@ -107,13 +116,19 @@ export class DevUsers extends React.Component<DevUsersProps, DevUsersState> {
         New
       </IonButton>
 
-      {(this.state?.users || []).map(u => {
-        return (
-          <div className="comment-hover" onClick={(e) => this.onEditUser(u)} key={u.userId}>
-            <UserProfileComponent user={u} ></UserProfileComponent>
-          </div>
-        )
-      })}
+      <IonList>
+        {(this.state?.users || []).map(u => {
+          return (
+            // detail='false' to remove the right arrow for iOS devices
+            <IonItem button detail={false}>
+              <UserProfileComponent user={u} onClick={(e) => this.onEditUser(u)} key={u.userId}></UserProfileComponent>
+              <PopoverButton>
+                <IonItem button onClick={(e) => { this.login(u.userId); popoverController.dismiss() }} detail={false}>Login</IonItem>
+              </PopoverButton>
+            </IonItem>
+          )
+        })}
+      </IonList>
 
       <CommonModal ref={this.commonModal} onCancel={() => this.onCancel()} onConfirm={() => this.onConfirm()} title={this.state?.modalTitle}>
         <DevUserForm schema={userProfileSchema} onStateChange={state => this.onModalStateChange(state)} value={this.state?.modalUserProfile}></DevUserForm>

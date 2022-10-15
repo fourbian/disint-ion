@@ -9,7 +9,8 @@ import {
   IonMenuToggle,
   IonNote,
   IonAccordionGroup,
-  IonAccordion
+  IonAccordion,
+  IonAvatar
 } from '@ionic/react';
 
 import React from "react";
@@ -22,24 +23,25 @@ import { Avatar } from './Avatar';
 
 class UserProfileProps {
   public user: UserProfile = new UserProfile();
+  public onClick? = (e: React.MouseEvent) => { };
 }
 
 class UserProfileState {
 }
 
 export class UserProfileComponent extends React.Component<UserProfileProps, UserProfileState> {
-  
+
   render() {
     return (
-      <div>
-        <Avatar url={this.props.user.avatar}>
-
-        </Avatar>
-        <div>
+      <>
+        <IonAvatar slot="start" onClick={(e) => this.props.onClick && this.props.onClick(e)}>
+          <img src={this.props.user.avatar} />
+        </IonAvatar>
+        <IonLabel onClick={(e) => this.props.onClick && this.props.onClick(e)}>
           {this.props.user.username}
-        </div>
+        </IonLabel>
 
-      </div>
+      </>
     )
   }
 } 
