@@ -54,9 +54,12 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
     render() {
 
         let comments = this.state.comments?.map((c: DisintComment<any>) => {
-            return <Link to={"/comments/" + c.id} key={c.id}>
+            // return <Link to={"/comments/" + c.id} key={c.id}>
+            //     {this.commentComponent(c)}
+            // </Link>
+            return <div key={c.id}>
                 {this.commentComponent(c)}
-            </Link>
+            </div>
         })
 
         return <div>

@@ -12,9 +12,15 @@ import { listener, listenerCtx } from '@milkdown/plugin-listener';
 import './MarkdownEditor.css'
 import { MarkdownController } from './MarkdownController';
 
+export class MarkdownEditorProps {
+    onMarkdownControllerChange: (markdownController: MarkdownController) => void;
+    markdown: string;
+    readonly?: boolean = false;
+}
+
 //  more at https://programming.vip/docs/milkdown-editor-integration-guide.html
 // binary at /usr/local/lib/node_modules/@ceramicnetwork/cli/node_modules/go-ipfs/bin/ipfs
-export const MarkdownEditor: React.FC<{ onMarkdownControllerChange: (markdownController: MarkdownController) => void, markdown: string }> = (props) => {
+export const MarkdownEditor: React.FC<MarkdownEditorProps> = (props) => {
     //let editor: Editor;
     let [changingInternally, setChangingInternally] = React.useState(false);
     let [markdownController, setMarkdownController] = React.useState<MarkdownController>(null as any);
@@ -25,7 +31,7 @@ export const MarkdownEditor: React.FC<{ onMarkdownControllerChange: (markdownCon
         }
 
         return () => { // onDestroy
-            
+
         }
     }, [props.markdown]);
 
@@ -43,19 +49,24 @@ export const MarkdownEditor: React.FC<{ onMarkdownControllerChange: (markdownCon
             })
             .use(nord)
             .use(history)
-            .use(clipboard)
             .use(listener)
-            .use(slash)
-            //.use(menu())
             .use(commonmark);
+
+        if (!props.readonly) {
+            createdEditor = createdEditor
+                //.use(menu())
+                .use(slash)
+                .use(clipboard);
+        }
 
         if (!markdownController) {
             markdownController = new MarkdownController();
             setMarkdownController(markdownController);
         }
         markdownController?.setEditor(createdEditor);
-        setTimeout(() => markdownController?.setMarkdown(props.markdown), 1000);
+        setTimeout(() => markdownController?.setMarkdown(props.markdown), 100);
         props.onMarkdownControllerChange(markdownController as any);
+        markdownController.setReadonly(props.readonly || false);
         return createdEditor;
 
     });

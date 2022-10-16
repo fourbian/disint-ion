@@ -19,6 +19,9 @@ import { MarkdownEditor } from "../markdown/MarkdownEditor";
 import { userService } from '../../services/users/UserService';
 import { UserProfile } from '../../models/UserProfile';
 import { UserProfileComponent } from './UserProfileComponent';
+import { PopoverButton } from '../shared/PopoverButton';
+import { popoverController } from '@ionic/core';
+import { Subscription } from 'rxjs';
 
 class FollowingUsersProps {
 }
@@ -28,20 +31,48 @@ class FollowingUsersState {
 }
 
 export class FollowingUsers extends React.Component<FollowingUsersProps, FollowingUsersState> {
-  
+  unFollowingSubscription: Subscription;
+  followingSubscription: Subscription;
 
   async componentDidMount() {
-    let users = await userService.followingUsers();
-    this.setState({users});
+    await this.updateUserState();
+    this.followingSubscription = userService.onFollowing(this.onFollowUserUpdate.bind(this));
+    this.unFollowingSubscription = userService.onUnFollowing(this.onFollowUserUpdate.bind(this));
     this.forceUpdate();
   }
 
+  componentWillUnmount() {
+    this.unFollowingSubscription.unsubscribe();
+    this.followingSubscription.unsubscribe();
+  }
+
+  async updateUserState() {
+    let users = await userService.followingUsers();
+    this.setState({ users });
+  }
+
+  onFollowUserUpdate(user: UserProfile) {
+    if (user?.userId) {
+      this.updateUserState();
+    }
+  }
+
+  unFollowUser(user: UserProfile) {
+    userService.unFollowUser(user);
+  }
+
   render() {
-    return <div>
+    return <IonList>
       {
-        this.state?.users.map(u => 
-          <UserProfileComponent user={u}></UserProfileComponent>
-      )}
-    </div>
+        this.state?.users.map(u =>
+          <IonItem button detail={false} key={u.userId}>
+            <UserProfileComponent user={u}></UserProfileComponent>
+            <PopoverButton>
+              <IonItem button onClick={(e) => { this.unFollowUser(u); popoverController.dismiss() }} detail={false}>Unfollow</IonItem>
+            </PopoverButton>
+          </IonItem>
+        )
+      }
+    </IonList>
   }
 } 

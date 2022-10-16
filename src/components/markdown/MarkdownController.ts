@@ -1,4 +1,4 @@
-import { Editor, rootCtx, defaultValueCtx, editorViewCtx, serializerCtx, parserCtx } from '@milkdown/core';
+import { Editor, rootCtx, defaultValueCtx, editorViewCtx, serializerCtx, parserCtx, editorViewOptionsCtx } from '@milkdown/core';
 import { Slice } from "prosemirror-model";
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
@@ -18,6 +18,13 @@ export class MarkdownController {
             const serializer = ctx.get(serializerCtx);
             return serializer(editorView.state?.doc);
         }) || "";
+    }
+
+    setReadonly(readonly: boolean) {
+        const editable = () => !readonly;
+        this.editor?.config((ctx) => {
+            ctx.set(editorViewOptionsCtx, { editable });
+        });
     }
 
     setMarkdown(markdown: string, fallbackEditor: Editor | null = null) {
@@ -43,7 +50,7 @@ export class MarkdownController {
         this.setMarkdown("");
     }
 
-    $input() : Observable<string> {
+    $input(): Observable<string> {
         return this.subject as Observable<string>;
     }
 
