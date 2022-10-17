@@ -2,6 +2,7 @@
   "name": "disint-ion",
   "version": "0.0.1",
   "private": true,
+  "typings": "index.d.ts",
   "dependencies": {
     "@3id/connect": "^0.4.1",
     "@ceramicnetwork/3id-did-resolver": "^2.0.0",

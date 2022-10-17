@@ -1,4 +1,4 @@
-import { BehaviorSubject, Observable, Subscription } from "rxjs";
+import { BehaviorSubject, Observable, Subject, Subscription } from "rxjs";
 import { UserProfile } from "../../models/UserProfile";
 import { IUserService } from "./IUserService";
 
@@ -6,8 +6,8 @@ export class LocalStorageUserService implements IUserService {
     private userProfile: UserProfile;
     private _isAuthenticated: boolean = true;
     private users: UserProfile[] = this.load();
-    private followingSubject = new BehaviorSubject<UserProfile>(new UserProfile());
-    private unFollowingSubject = new BehaviorSubject<UserProfile>(new UserProfile());
+    private followingSubject = new Subject<UserProfile>();
+    private unFollowingSubject = new Subject<UserProfile>();
 
     private load(): UserProfile[] {
         const dbString = localStorage.getItem('disint.db.users');

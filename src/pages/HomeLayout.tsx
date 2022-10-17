@@ -23,28 +23,41 @@ import { CommentBrief } from '../components/comments/CommentBrief';
 const HomeLayout: React.FC = () => {
 
   let commentNavigator = React.createRef<CommentNavigator>();
-
   const params = useParams<{ commentId: string; }>();
   const parentCommentId = params.commentId || "";
-  const query = new CommentQuery({ parentId: parentCommentId }, userService).mine();
+  const baseQuery = () => new CommentQuery({ parentId: parentCommentId }, userService).mine().following();
+  let [query, setQuery] = useState(baseQuery());
   let [profile, setProfile] = useState(new UserProfile());
   let [commentView, setCommentView] = useState("CommentBrief");
 
-  let subscription: Subscription | null = null;
+  let markdownControllerSubscription: Subscription | null = null;
+  let unFollowingSubscription: Subscription;
+  let followingSubscription: Subscription;
 
   let [markdownController, setMarkdownController] = useState(new MarkdownController());
 
+  let onFollowUserUpdate = (user: UserProfile) => {
+    if (user?.userId) {
+      setQuery(baseQuery());
+    }
+  }
+
   useEffect(() => {
     userService.readProfile().then(p => setProfile(p));
+    followingSubscription = userService.onFollowing(onFollowUserUpdate.bind(this));
+    unFollowingSubscription = userService.onUnFollowing(onFollowUserUpdate.bind(this));
+
     return () => { // onDestroy
-      subscription?.unsubscribe();
+      markdownControllerSubscription?.unsubscribe();
+      unFollowingSubscription?.unsubscribe();
+      followingSubscription?.unsubscribe();
     }
   })
 
   let updateMarkdownController = (markdownController: MarkdownController) => {
     setMarkdownController(markdownController);
-    if (subscription) subscription.unsubscribe();
-    subscription = markdownController.$input()
+    if (markdownControllerSubscription) markdownControllerSubscription.unsubscribe();
+    markdownControllerSubscription = markdownController.$input()
       .pipe(
         debounceTime(10), // covers up a bug where this is being called twice in a row some how
         // tap(markdown => {

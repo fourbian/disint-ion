@@ -20,6 +20,7 @@ class CommentNavigatorState {
 export class CommentNavigator extends React.Component<CommentNavigatorProps, CommentNavigatorState> {
     _parentComment: DisintComment<any>;
     _loading = false;
+    _lastUsedQuery: CommentQuery;
 
     public constructor(props: CommentNavigatorProps) {
         super(props);
@@ -34,6 +35,7 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
         if (this._loading) return
         this._loading = true;
 
+        this._lastUsedQuery = this.props.query;
         const comments = await commentQueryService.query(this.props.query);
 
         this.setState({ comments });
@@ -51,15 +53,27 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
         }
     }
 
+    async reloadCommentsIfQueryChanged() {
+        if (!this._lastUsedQuery) return;
+
+        const isSameQuery = await this._lastUsedQuery.isEqual(this.props.query);
+
+        if (!isSameQuery) {
+            await this.loadComments();
+        }
+    }
+
     render() {
 
+        this.reloadCommentsIfQueryChanged();
+
         let comments = this.state.comments?.map((c: DisintComment<any>) => {
-            // return <Link to={"/comments/" + c.id} key={c.id}>
-            //     {this.commentComponent(c)}
-            // </Link>
-            return <div key={c.id}>
+            return <Link to={"/comments/" + c.id} key={c.id}>
                 {this.commentComponent(c)}
-            </div>
+            </Link>
+            // return <div key={c.id}>
+            //     {this.commentComponent(c)}
+            // </div>
         })
 
         return <div>
