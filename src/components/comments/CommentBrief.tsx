@@ -5,6 +5,7 @@ import { MarkdownController } from "../markdown/MarkdownController";
 import { MarkdownEditor } from "../markdown/MarkdownEditor";
 import { commentService } from "../../services/comments/CommentService";
 import { commentQueryService } from "../../services/comments/CommentQueryService";
+import { IonAvatar } from "@ionic/react";
 
 export class CommentBriefProps {
   comment?: DisintComment<any>;
@@ -41,7 +42,13 @@ export class CommentBrief extends React.Component<CommentBriefProps, CommentBrie
     this.loadComment();
 
     if (!this.state.comment) return null;
-    else return <div className="comment-hover" >
+    else return <div className="comment-hover" style={{ display: 'flex', flexDirection: 'row', }}>
+      <IonAvatar>
+        <img src="https://ui-avatars.com/api/?name=zz"></img>
+      </IonAvatar>
+      <span style={{ paddingLeft: '5px' }}>
+
+      </span>
       <MarkdownEditor readonly={true} markdown={this.state.comment.content} onMarkdownControllerChange={(_) => this.markdownController = _}></MarkdownEditor>
     </div>
   }

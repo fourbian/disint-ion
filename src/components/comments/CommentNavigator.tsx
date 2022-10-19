@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { commentQueryService } from "../../services/comments/CommentQueryService"
 import { CommentQuery } from "../../models/CommentQuery";
 import { CommentBrief } from "./CommentBrief";
+import './CommentNavigator.css'
 
 class CommentNavigatorProps {
     query: CommentQuery;
@@ -68,16 +69,18 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
         this.reloadCommentsIfQueryChanged();
 
         let comments = this.state.comments?.map((c: DisintComment<any>) => {
-            return <Link to={"/comments/" + c.id} key={c.id}>
-                {this.commentComponent(c)}
-            </Link>
+            return <div className="navigator-comment">
+                <Link className="nostyle" to={"/comments/" + c.id} key={c.id}>
+                    {this.commentComponent(c)}
+                </Link>
+            </div>
             // return <div key={c.id}>
             //     {this.commentComponent(c)}
             // </div>
         })
 
         return <div>
-            <h3>
+            <h3 className="nostyle">
                 Comments
             </h3>
             {comments}
