@@ -2,15 +2,13 @@
 a.nostyle:link {
     text-decoration: inherit!important;
     color: inherit!important;
-    cursor: auto!important;
 }
 
 a.nostyle:visited {
     text-decoration: inherit!important;
     color: inherit!important;
-    cursor: auto!important;
 }
 
 .navigator-comment {
-    margin-bottom:10px;
+    margin-bottom:20px;
 }

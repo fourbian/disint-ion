@@ -7,6 +7,7 @@ import { commentQueryService } from "../../services/comments/CommentQueryService
 import { CommentQuery } from "../../models/CommentQuery";
 import { CommentBrief } from "./CommentBrief";
 import './CommentNavigator.css'
+import { IonAvatar, IonItem, IonLabel, IonList } from "@ionic/react";
 
 class CommentNavigatorProps {
     query: CommentQuery;
@@ -65,15 +66,19 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
     }
 
     render() {
-
         this.reloadCommentsIfQueryChanged();
 
         let comments = this.state.comments?.map((c: DisintComment<any>) => {
-            return <div className="navigator-comment">
+            return <IonItem button key={c.id} style={{ marginBottom: '10px' }}>
+                <IonAvatar slot="start" style={{ marginBottom: 'auto', marginTop: '2px' }}>
+                    <img src="https://ui-avatars.com/api/?name=zz" />
+                </IonAvatar>
                 <Link className="nostyle" to={"/comments/" + c.id} key={c.id}>
                     {this.commentComponent(c)}
+                    <div style={{ marginBottom: '10px' }}></div>
                 </Link>
-            </div>
+
+            </IonItem>
             // return <div key={c.id}>
             //     {this.commentComponent(c)}
             // </div>
@@ -83,7 +88,9 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
             <h3 className="nostyle">
                 Comments
             </h3>
-            {comments}
+            <IonList>
+                {comments}
+            </IonList>
         </div>
 
     }
