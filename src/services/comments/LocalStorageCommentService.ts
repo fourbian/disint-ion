@@ -21,7 +21,7 @@ export class LocalStorageCommentService implements ICommentService {
         comment.id = uuidv4();
         comment.cid = 'c' + comment.id;
         comment.mimetype = mimetype;
-        comment.userId = (await this.userService.readProfile()).userId;
+        comment.userId = (await this.userService.readCurrentUserProfile()).userId;
         if (parentCommentId) comment.parentIds = [parentCommentId];
 
         this.comments.push(comment);

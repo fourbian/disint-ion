@@ -34,7 +34,7 @@ export class LocalStorageUserService implements IUserService {
     }
 
     public async followingUsers(): Promise<UserProfile[]> {
-        const followingUserIds = this.userProfile.followingUserIds || [];
+        const followingUserIds = this.userProfile?.followingUserIds || [];
         return this.load().filter(u => followingUserIds.includes(u.userId));
     }
 
@@ -47,21 +47,24 @@ export class LocalStorageUserService implements IUserService {
         return this.userProfile;
     }
 
-    async readProfile(): Promise<UserProfile> {
-        const profileString = localStorage.getItem(this.userProfile.userId);
-        if (profileString) {
-            const profile = JSON.parse(profileString);
-            this.userProfile = new UserProfile();
-            this.userProfile.userId = profile.userId;
-            this.userProfile.username = profile.username;
-            this.userProfile.avatar = profile.avatar;
-        }
+    async readCurrentUserProfile(): Promise<UserProfile> {
+        const users = this.load();
+        this.userProfile = users.filter(u => u.userId == this.userProfile.userId)[0] || this.userProfile;
 
         return this.userProfile;
     }
 
-    async updateProfile(profile: UserProfile): Promise<UserProfile> {
+    async readProfile(userId: string): Promise<UserProfile> {
+        const users = this.load();
+        const profile = users.filter(u => u.userId == userId)[0];
 
+        return profile;
+    }
+
+    async updateProfile(profile: UserProfile): Promise<UserProfile> {
+        if (!profile) {
+            throw new Error(`updateProfile(): profile must be of type UserProfile.  Got ${JSON.stringify(profile)}`);
+        }
         this.users = this.load();
 
         this.userProfile.avatar = profile.avatar;

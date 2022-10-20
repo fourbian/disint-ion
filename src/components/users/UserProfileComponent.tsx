@@ -19,7 +19,7 @@ import { MarkdownController } from "../markdown/MarkdownController";
 import { MarkdownEditor } from "../markdown/MarkdownEditor";
 import { userService } from '../../services/users/UserService';
 import { UserProfile } from '../../models/UserProfile'
-import { Avatar } from './Avatar';
+import { LazyAvatar } from './LazyAvatar';
 
 class UserProfileProps {
   public user: UserProfile = new UserProfile();

@@ -17,6 +17,20 @@ export class UserProfile {
     userId: string;
 
     followingUserIds: string[] = [];
+
+    isEqual(other: UserProfile): boolean {
+        if (!other) return false;
+        let thisFollowingUserIds = this.followingUserIds || [];
+        let otherFollowingUserIds = other.followingUserIds || [];
+        let hasSameFollowingUserIds = thisFollowingUserIds.sortBy(x => x).equals(otherFollowingUserIds.sortBy(x => x));
+        let hasSameAvatar = this.avatar == other.avatar;
+        let hasSameUsername = this.username == other.username;
+
+        let isEqual = hasSameFollowingUserIds && hasSameAvatar && hasSameUsername;
+        //console.log(isEqual, "*****");
+        return isEqual;
+
+    }    
 }
 
 export const userProfileSchema: Joi.ObjectSchema<UserProfile> = Joi.object({

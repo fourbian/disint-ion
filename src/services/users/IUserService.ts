@@ -9,9 +9,10 @@ export interface IUserService {
     unFollowUser(user: UserProfile): Promise<UserProfile | null>;
     isAuthenticated(): boolean;
     authenticate(): Promise<UserProfile>;
-    readProfile(): Promise<UserProfile>;
+    readCurrentUserProfile(): Promise<UserProfile>;
+    readProfile(userId: string): Promise<UserProfile>;
     updateProfile(profile: UserProfile): Promise<UserProfile>;
-    publishedUsers() : Promise<UserProfile[]>;
-    followingUsers() : Promise<UserProfile[]>;
+    publishedUsers(): Promise<UserProfile[]>;
+    followingUsers(): Promise<UserProfile[]>;
 
 }

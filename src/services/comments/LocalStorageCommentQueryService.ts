@@ -31,6 +31,15 @@ export class LocalStorageCommentQueryService implements ICommentQueryService {
             }
             comments = comments.filter(parentFilter);
         }
+        if (options.isTopLevel)
+        {
+            let topLevelFilter = (c: DisintComment<any>) => {
+                let hasMatchingChildrenIds = comments.filter(parentComment => parentComment.childrenIds?.includes(c.id)).length;
+                let hasParentIds = !!c.parentIds?.length;
+                return !hasParentIds && !hasMatchingChildrenIds;
+            }
+            comments = comments.filter(topLevelFilter);
+        }
         if (options?.userIds.length) {
             comments = comments.filter(c => options?.userIds.includes(c.userId));
         }

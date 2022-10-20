@@ -13,7 +13,7 @@ import { Mimetypes } from '../services/comments/ICommentService';
 import { CommentQuery } from '../models/CommentQuery';
 import { UserProfile } from '../models/UserProfile';
 import { FollowingUsers } from '../components/users/FollowingUsers';
-import { Avatar } from '../components/users/Avatar';
+import { LazyAvatar } from '../components/users/LazyAvatar';
 import { UserProfileComponent } from '../components/users/UserProfileComponent';
 import { CommentStandard } from '../components/comments/CommentStandard';
 import { PopoverButton } from '../components/shared/PopoverButton';
@@ -25,7 +25,7 @@ const HomeLayout: React.FC = () => {
   let commentNavigator = React.createRef<CommentNavigator>();
   const params = useParams<{ commentId: string; }>();
   const parentCommentId = params.commentId || "";
-  const baseQuery = () => new CommentQuery({ parentId: parentCommentId }, userService).mine().following();
+  const baseQuery = () => new CommentQuery(userService).mine().following().parentOrTopLevel(parentCommentId);
   let [query, setQuery] = useState(baseQuery());
   let [profile, setProfile] = useState(new UserProfile());
   let [commentView, setCommentView] = useState("CommentBrief");
@@ -43,7 +43,11 @@ const HomeLayout: React.FC = () => {
   }
 
   useEffect(() => {
-    userService.readProfile().then(p => setProfile(p));
+    userService.readCurrentUserProfile().then(p => {
+      if (p && !p.isEqual(profile)) {
+        setProfile(p)
+      }
+    });
     followingSubscription = userService.onFollowing(onFollowUserUpdate.bind(this));
     unFollowingSubscription = userService.onUnFollowing(onFollowUserUpdate.bind(this));
 
@@ -113,7 +117,7 @@ const HomeLayout: React.FC = () => {
         <IonItem lines="none">
           <UserProfileComponent user={profile}></UserProfileComponent>
         </IonItem>
-        <MarkdownEditor onMarkdownControllerChange={_ => updateMarkdownController(_)} markdown={markdownController.getMarkdown()} />
+        {<MarkdownEditor onMarkdownControllerChange={_ => updateMarkdownController(_)} markdown={markdownController.getMarkdown()} />}
         <IonButton onClick={create}>Save</IonButton>
 
         <FollowingUsers></FollowingUsers>

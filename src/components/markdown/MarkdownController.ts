@@ -16,7 +16,7 @@ export class MarkdownController {
         return this.editor?.action((ctx) => {
             const editorView = ctx.get(editorViewCtx);
             const serializer = ctx.get(serializerCtx);
-            return serializer(editorView.state?.doc);
+            return serializer(editorView?.state?.doc || "");
         }) || "";
     }
 
