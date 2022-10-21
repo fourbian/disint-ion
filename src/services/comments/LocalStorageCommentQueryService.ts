@@ -16,7 +16,7 @@ export class LocalStorageCommentQueryService implements ICommentQueryService {
     }
 
     public async query(options?: CommentQuery): Promise<DisintComment<any>[]> {
-
+        //console.log(options);
         if (!options) options = new CommentQuery();
 
         options = await options.wait();
@@ -31,8 +31,7 @@ export class LocalStorageCommentQueryService implements ICommentQueryService {
             }
             comments = comments.filter(parentFilter);
         }
-        if (options.isTopLevel)
-        {
+        if (options.isTopLevel) {
             let topLevelFilter = (c: DisintComment<any>) => {
                 let hasMatchingChildrenIds = comments.filter(parentComment => parentComment.childrenIds?.includes(c.id)).length;
                 let hasParentIds = !!c.parentIds?.length;

@@ -38,6 +38,8 @@ const HomeLayout: React.FC = () => {
   let [commentView, setCommentView] = useState("CommentBrief");
   let [showSave, setShowSave] = useState(false);
 
+  //console.log(parentCommentId);
+
   let markdownControllerSubscription: Subscription | null = null;
   let unFollowingSubscription: Subscription;
   let followingSubscription: Subscription;
@@ -76,6 +78,14 @@ const HomeLayout: React.FC = () => {
   }
 
   useEffect(() => {
+    //console.log("useEffect.parentId", query.parentId, parentCommentId);
+    // BUG: ?  This conditional is not needed for the first few navigations, but then it appears
+    // that useState(baseQuery()) above is not using the baseQuery(), but re-using a previous
+    // state from another parent.  So, we have to check here and force it if it is different.
+    // Will this affect things when more complicated CommentQueries come along?
+    if (query.parentId != parentCommentId) {
+      setQuery(baseQuery());
+    }
     userService.readCurrentUserProfile().then(p => {
       if (p && !p.isEqual(profile)) {
         setProfile(p)

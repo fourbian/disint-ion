@@ -48,6 +48,7 @@ export class LocalStorageCommentService implements ICommentService {
     }
 
     async load<T>(commentId: string): Promise<DisintComment<T>> {
+        //console.log('loading ', commentId)
         return await this.queryService.load<T>(commentId);
     }
 

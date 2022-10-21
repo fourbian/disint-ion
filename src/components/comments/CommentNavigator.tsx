@@ -9,6 +9,7 @@ import { CommentBrief } from "./CommentBrief";
 import './CommentNavigator.css'
 import { IonAvatar, IonItem, IonLabel, IonList } from "@ionic/react";
 import { LazyAvatar } from "../users/LazyAvatar";
+import { PopoverButton } from "../shared/PopoverButton";
 
 class CommentNavigatorProps {
     query: CommentQuery;
@@ -57,6 +58,7 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
     }
 
     async reloadCommentsIfQueryChanged() {
+        //console.log("CommentNavigator", this.props.query)
         if (!this._lastUsedQuery) return;
 
         const isSameQuery = await this._lastUsedQuery.isEqual(this.props.query);
@@ -74,10 +76,14 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
                 <LazyAvatar userId={c.userId}>
 
                 </LazyAvatar>
-                <Link className="nostyle" to={"/comments/" + c.id} key={c.id}>
+                <Link className="nostyle" to={"/comments/" + c.id} key={c.id} style={{ display: 'flex', flex: 'auto' }}>
                     {this.commentComponent(c)}
                     <div style={{ marginBottom: '10px' }}></div>
                 </Link>
+                <span style={{ marginBottom: 'auto' }}>
+                    <PopoverButton>
+                    </PopoverButton>
+                </span>
 
             </IonItem>
             // return <div key={c.id}>

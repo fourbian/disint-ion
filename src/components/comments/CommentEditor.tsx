@@ -30,7 +30,7 @@ export class CommentEditorState {
 }
 
 export class CommentEditor extends React.Component<CommentEditorProps, CommentEditorState> {
-  loadCommentPromise: Promise<DisintComment<any>>;
+  loadCommentId: string;
   markdownController: MarkdownController = new MarkdownController();
   markdownControllerSubscription: Subscription;
   serviceBusSubscription: Subscription;
@@ -39,6 +39,7 @@ export class CommentEditor extends React.Component<CommentEditorProps, CommentEd
 
   constructor(props: CommentEditorProps) {
     super(props);
+    //console.log("**initializing CommentEditor")
     this.state = new CommentEditorState({ comment: this.props.comment });
     this.setCommentState(new DisintComment({ comment: this.props.comment }));
     userService.readCurrentUserProfile().then(u => this.user = u);
@@ -58,9 +59,14 @@ export class CommentEditor extends React.Component<CommentEditorProps, CommentEd
   }
 
   loadComment() {
-    if (!this.props.comment && !this.state.comment && this.props.commentId) {
-      this.loadCommentPromise = this.loadCommentPromise || commentService.load(this.props.commentId)
-        .then(comment => this.setCommentState(comment));
+    // console.log('this.props.commentId', this.props.commentId);
+    // console.log('this.props.comment', this.props.comment);
+    // console.log('this.state.comment', this.state.comment);
+    let propCommentId = this.props.comment?.id || this.props.commentId;
+    let differentCommentIds = propCommentId != this.state?.comment?.id;
+    if (differentCommentIds && propCommentId != this.loadCommentId) {
+      this.loadCommentId = propCommentId || "";
+      if (this.loadCommentId) commentService.load(this.loadCommentId).then(comment => this.setCommentState(comment));
     }
   }
 

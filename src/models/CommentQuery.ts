@@ -44,6 +44,7 @@ export class CommentQuery {
     }
 
     parentOrTopLevel(parentId: string) {
+        //console.log("parentOrTopLevel", parentId)
         this.parentId = parentId;
         this.isTopLevel = !parentId;
         return this;
