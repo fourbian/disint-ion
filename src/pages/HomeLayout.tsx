@@ -1,5 +1,5 @@
-import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonMenuButton, IonPage, IonTitle, IonToolbar } from '@ionic/react';
-import React, { useEffect, useState } from 'react';
+import { IonAvatar, IonButton, IonButtons, IonCard, IonCardContent, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonMenuButton, IonPage, IonTitle, IonToolbar } from '@ionic/react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { createRef } from 'react';
 import { useParams } from 'react-router';
 import { MarkdownEditor } from '../components/markdown/MarkdownEditor';
@@ -34,10 +34,12 @@ const HomeLayout: React.FC = () => {
   const parentCommentId = params.commentId || "";
   const baseQuery = () => new CommentQuery(userService).mine().following().parentOrTopLevel(parentCommentId);
   let [query, setQuery] = useState(baseQuery());
-  let [profile, setProfile] = useState(new UserProfile());
+  let [profile, setProfile] = useState<UserProfile | null>(null);
   let [commentView, setCommentView] = useState("CommentBrief");
   let [showSave, setShowSave] = useState(false);
+  const [_, forceUpdate] = useReducer((x) => x + 1, 0);
 
+  //userService.readCurrentUserProfile().then(u => profile == null && setProfile(u));
   //console.log(parentCommentId);
 
   let markdownControllerSubscription: Subscription | null = null;
@@ -56,7 +58,7 @@ const HomeLayout: React.FC = () => {
   let create = async () => {
     //let streamId = await portal.create(markdown, 'text/markdown', _parentStreamId);
     let comment = await commentService.create<string>(markdownController.getMarkdown(), Mimetypes.MARKDOWN, parentCommentId);
-    console.log(comment);
+    //console.log(comment);
     markdownController.setMarkdown('');
 
     // a few ways to do this:
@@ -87,8 +89,8 @@ const HomeLayout: React.FC = () => {
       setQuery(baseQuery());
     }
     userService.readCurrentUserProfile().then(p => {
-      if (p && !p.isEqual(profile)) {
-        setProfile(p)
+      if (p && !p.isEqual(profile as any)) {
+        setProfile(p);
       }
     });
     followingSubscription = userService.onFollowing(onFollowUserUpdate.bind(this));
@@ -143,6 +145,7 @@ const HomeLayout: React.FC = () => {
       </IonHeader>
 
       <IonContent >
+        <div style={{ marginTop: "10px" }}></div>
         <IonHeader collapse="condense">
           <IonToolbar>
             <IonTitle size="large">{parentCommentId}</IonTitle>
@@ -150,15 +153,44 @@ const HomeLayout: React.FC = () => {
         </IonHeader>
 
         {parentCommentId &&
-          <CommentEditor commentId={parentCommentId}></CommentEditor>
+
+          <div>
+            <IonItem lines="none">
+              <LazyAvatar userId={profile?.userId as any}>
+
+              </LazyAvatar>
+              <IonLabel>
+                Todo create lazy UserProfile component
+              </IonLabel>
+            </IonItem>
+            <div style={{ padding: '20px' }}>
+              <CommentEditor commentId={parentCommentId}></CommentEditor>
+            </div>
+          </div>
         }
-        {parentCommentId && <h3 className="nostyle">
-          Comments
-        </h3>}
-        <IonItem lines="none">
-          <UserProfileComponent user={profile}></UserProfileComponent>
-        </IonItem>
-        <MarkdownEditor onMarkdownControllerChange={_ => updateMarkdownController(_)} markdown={markdownController.getMarkdown()} />
+        {parentCommentId && <IonList>
+          <IonItem >
+            <IonLabel>
+              <h1>Comments</h1>
+            </IonLabel>
+          </IonItem>
+        </IonList>
+        }
+
+        {/* I would love to put MarkdownEditor in an IonLabel.  It works perfectly - except the dropdown menu gets clipped */}
+        <div className="ion-item-fallback" >
+          <IonItem lines="none">
+            <LazyAvatar userId={profile?.userId as any}>
+
+            </LazyAvatar>
+
+          </IonItem>
+          <div style={{ paddingTop: '10px' }}>
+            <MarkdownEditor onMarkdownControllerChange={_ => updateMarkdownController(_)} markdown={markdownController.getMarkdown()} />
+
+          </div>
+
+        </div>
 
         <div style={{ display: 'flex', justifyContent: 'right' }}>
           <PopoverButton label='Select view' >

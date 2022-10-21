@@ -1,0 +1,11 @@
+.ion-item-fallback :nth-child(2) {
+    width:100%!important;
+    /*background-color:red!important;*/
+
+}
+
+.ion-item-fallback {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
