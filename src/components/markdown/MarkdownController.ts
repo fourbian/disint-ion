@@ -1,9 +1,9 @@
 import { Editor, rootCtx, defaultValueCtx, editorViewCtx, serializerCtx, parserCtx, editorViewOptionsCtx } from '@milkdown/core';
 import { Slice } from "prosemirror-model";
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 
 export class MarkdownController {
-    public subject = new BehaviorSubject<string>("");
+    public subject = new Subject<string>();
     constructor(private editor: Editor | null = null) {
         // constructor has to be intentionally light because it may get instantiated several times by react's renderer
     }

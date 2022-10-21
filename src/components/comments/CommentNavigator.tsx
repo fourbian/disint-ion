@@ -86,9 +86,6 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
         })
 
         return <div>
-            <h3 className="nostyle">
-                Comments
-            </h3>
             <IonList>
                 {comments}
             </IonList>

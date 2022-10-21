@@ -27,7 +27,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = (props) => {
 
     React.useEffect(() => {
         if (!changingInternally) {
-            setTimeout(() => markdownController?.setMarkdown(''), 0);
+            setTimeout(() => markdownController?.setMarkdown(props.markdown), 0);
         }
 
         return () => { // onDestroy
@@ -36,10 +36,10 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = (props) => {
     }, [props.markdown]);
 
     const reactEditor = useEditor((root) => {
-        console.log("useEditor()");
+        //console.log("useEditor()");
         let createdEditor = Editor.make()
             .config((ctx) => {
-                console.log("configEditor()");
+                //console.log("configEditor()");
                 ctx.set(rootCtx, root);
                 ctx.get<any>(listenerCtx).markdownUpdated((ctx: any, markdown: string, prevMarkdown: string) => {
                     setChangingInternally(previous => true);

@@ -1,4 +1,4 @@
-import { IonButton, IonButtons, IonContent, IonHeader, IonItem, IonMenuButton, IonPage, IonTitle, IonToolbar } from '@ionic/react';
+import { IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonMenuButton, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import React, { useEffect, useState } from 'react';
 import { createRef } from 'react';
 import { useParams } from 'react-router';
@@ -19,6 +19,13 @@ import { CommentStandard } from '../components/comments/CommentStandard';
 import { PopoverButton } from '../components/shared/PopoverButton';
 import { popoverController } from '@ionic/core';
 import { CommentBrief } from '../components/comments/CommentBrief';
+import { CommentEditor } from '../components/comments/CommentEditor';
+import { arrowForwardCircle, saveOutline, sendOutline } from 'ionicons/icons';
+import { FloatingActionButtons } from '../components/shared/FloatingActionButtons';
+import { serviceBus } from '../services/bus/ServiceBus';
+import { BeginNewCommentEvent } from '../services/bus/BeginNewCommentEvent';
+import { IServiceBusEvent } from '../services/bus/IServiceBusEvent';
+import { RequestAddCommentEvent } from '../services/bus/RequestAddCommentEvent';
 
 const HomeLayout: React.FC = () => {
 
@@ -29,10 +36,12 @@ const HomeLayout: React.FC = () => {
   let [query, setQuery] = useState(baseQuery());
   let [profile, setProfile] = useState(new UserProfile());
   let [commentView, setCommentView] = useState("CommentBrief");
+  let [showSave, setShowSave] = useState(false);
 
   let markdownControllerSubscription: Subscription | null = null;
   let unFollowingSubscription: Subscription;
   let followingSubscription: Subscription;
+  let serviceBusSubscription: Subscription;
 
   let [markdownController, setMarkdownController] = useState(new MarkdownController());
 
@@ -40,37 +49,6 @@ const HomeLayout: React.FC = () => {
     if (user?.userId) {
       setQuery(baseQuery());
     }
-  }
-
-  useEffect(() => {
-    userService.readCurrentUserProfile().then(p => {
-      if (p && !p.isEqual(profile)) {
-        setProfile(p)
-      }
-    });
-    followingSubscription = userService.onFollowing(onFollowUserUpdate.bind(this));
-    unFollowingSubscription = userService.onUnFollowing(onFollowUserUpdate.bind(this));
-
-    return () => { // onDestroy
-      markdownControllerSubscription?.unsubscribe();
-      unFollowingSubscription?.unsubscribe();
-      followingSubscription?.unsubscribe();
-    }
-  })
-
-  let updateMarkdownController = (markdownController: MarkdownController) => {
-    setMarkdownController(markdownController);
-    if (markdownControllerSubscription) markdownControllerSubscription.unsubscribe();
-    markdownControllerSubscription = markdownController.$input()
-      .pipe(
-        debounceTime(10), // covers up a bug where this is being called twice in a row some how
-        // tap(markdown => {
-        //   console.log("**", markdown)
-        // })
-      )
-      .subscribe((markdown: string) => {
-        console.log("updated markdown:", markdown)
-      });
   }
 
   let create = async () => {
@@ -87,6 +65,52 @@ const HomeLayout: React.FC = () => {
     commentNavigator.current?.loadComments();
 
   }
+
+  let onAddNewComment = (serviceBusEvent: IServiceBusEvent) => {
+    if (serviceBusEvent instanceof RequestAddCommentEvent) {
+      let e = serviceBusEvent as RequestAddCommentEvent;
+      if (e.id == parentCommentId) {
+        create();
+      }
+    }
+  }
+
+  useEffect(() => {
+    userService.readCurrentUserProfile().then(p => {
+      if (p && !p.isEqual(profile)) {
+        setProfile(p)
+      }
+    });
+    followingSubscription = userService.onFollowing(onFollowUserUpdate.bind(this));
+    unFollowingSubscription = userService.onUnFollowing(onFollowUserUpdate.bind(this));
+    serviceBusSubscription = serviceBus.subscribe(onAddNewComment.bind(this));
+
+    return () => { // onDestroy
+      markdownControllerSubscription?.unsubscribe();
+      unFollowingSubscription?.unsubscribe();
+      followingSubscription?.unsubscribe();
+      serviceBusSubscription?.unsubscribe();
+    }
+  })
+
+
+  let updateMarkdownController = (markdownController: MarkdownController) => {
+    setMarkdownController(markdownController);
+    if (markdownControllerSubscription) markdownControllerSubscription.unsubscribe();
+    markdownControllerSubscription = markdownController.$input()
+      .pipe(
+        //debounceTime(10), // covers up a bug where this is being called twice in a row some how
+        // tap(markdown => {
+        //   console.log("**", markdown)
+        // })
+      )
+      .subscribe((markdown: string) => {
+        let active = !!markdown;
+        serviceBus.emit(new BeginNewCommentEvent(parentCommentId, active));
+        //console.log("updated markdown:", markdown)
+      });
+  }
+
 
   let onSetCommentView = (viewName: string) => {
     setCommentView(viewName);
@@ -114,16 +138,18 @@ const HomeLayout: React.FC = () => {
             <IonTitle size="large">{parentCommentId}</IonTitle>
           </IonToolbar>
         </IonHeader>
+
+        {parentCommentId &&
+          <CommentEditor commentId={parentCommentId}></CommentEditor>
+        }
+        {parentCommentId && <h3 className="nostyle">
+          Comments
+        </h3>}
         <IonItem lines="none">
           <UserProfileComponent user={profile}></UserProfileComponent>
         </IonItem>
-        {<MarkdownEditor onMarkdownControllerChange={_ => updateMarkdownController(_)} markdown={markdownController.getMarkdown()} />}
-        <IonButton onClick={create}>Save</IonButton>
+        <MarkdownEditor onMarkdownControllerChange={_ => updateMarkdownController(_)} markdown={markdownController.getMarkdown()} />
 
-        <FollowingUsers></FollowingUsers>
-        {parentCommentId &&
-          <CommentBrief commentId={parentCommentId}></CommentBrief>
-        }
         <div style={{ display: 'flex', justifyContent: 'right' }}>
           <PopoverButton label='Select view' >
             <IonItem button onClick={(e) => onSetCommentView("CommentBrief")} detail={false}>Brief</IonItem>
@@ -131,7 +157,10 @@ const HomeLayout: React.FC = () => {
           </PopoverButton>
 
         </div>
+
         <CommentNavigator component={commentView} query={query} ref={commentNavigator}></CommentNavigator>
+
+        <FloatingActionButtons addId={parentCommentId} saveId={parentCommentId}></FloatingActionButtons>
       </IonContent>
     </IonPage >
   );

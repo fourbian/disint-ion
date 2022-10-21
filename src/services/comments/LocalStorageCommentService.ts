@@ -16,6 +16,24 @@ export class LocalStorageCommentService implements ICommentService {
         this.userService = userService;
     }
 
+    async save<T>(id: string, content: T): Promise<void> {
+        this.comments = await this.queryService.query(new CommentQuery());
+        let userProfile = await this.userService.readCurrentUserProfile();
+        let comment = this.comments.filter(c => c.id == id)[0];
+        if (!comment) {
+            alert("comment not found");
+            throw new Error("comment not found");
+        }
+        if (comment.userId != userProfile?.userId) {
+            alert("cannot edit someone elses comment!")
+            throw new Error("cannot edit someone elses comment!");
+        }
+
+        comment.content = content;
+
+        this.saveComments();
+    }
+
     async create<T>(content: T, mimetype: string, parentCommentId: string = ""): Promise<void> {
         let comment = new DisintComment<T>({ content });
         comment.id = uuidv4();
