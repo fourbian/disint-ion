@@ -13,7 +13,7 @@ import {
 } from '@ionic/react';
 
 import { useLocation } from 'react-router-dom';
-import { personOutline, archiveOutline, archiveSharp, homeOutline,  bookmarkOutline, heartOutline, heartSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, trashOutline, trashSharp, warningOutline, warningSharp } from 'ionicons/icons';
+import { personOutline, archiveOutline, archiveSharp, homeOutline, bookmarkOutline, heartOutline, heartSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, trashOutline, trashSharp, warningOutline, warningSharp } from 'ionicons/icons';
 import './Menu.css';
 import { CeramicPortal } from '../lib/ceramic/ceramic-portal';
 import config from '../config.json'
@@ -21,6 +21,9 @@ import { useState } from 'react';
 import { DevUsers } from './dev/DevUsers';
 import { FollowingUsers } from './users/FollowingUsers';
 import { PublishedUsers } from './users/PublishedUsers';
+import { CommentNavigator } from './comments/CommentNavigator';
+import { CommentQuery } from '../models/CommentQuery';
+import React from 'react';
 
 
 const Menu2: React.FC = () => {
@@ -28,6 +31,8 @@ const Menu2: React.FC = () => {
   const [loginName, setLoginName] = useState("");
   const [loginAddress, setLoginAddress] = useState("");
   let portal = CeramicPortal.getInstance(config.ceramicEndpoints);
+  let query = new CommentQuery();
+  let commentNavigator = React.createRef<CommentNavigator>();
 
   let connectWallet = async () => {
     await portal.authenticate();
@@ -42,13 +47,13 @@ const Menu2: React.FC = () => {
   return (
     <IonMenu contentId="main" type="overlay" side="end">
       <IonContent>
-      <IonAccordionGroup>
+        <IonAccordionGroup>
           <IonAccordion value="DevUsers">
             <IonItem slot="header" color="light">
               <IonLabel>Dev - Users</IonLabel>
             </IonItem>
             <div className="ion-padding" slot="content">
-            <DevUsers></DevUsers>
+              <DevUsers></DevUsers>
             </div>
           </IonAccordion>
           <IonAccordion value="QuickSearch">
@@ -56,7 +61,7 @@ const Menu2: React.FC = () => {
               <IonLabel>Quick Search</IonLabel>
             </IonItem>
             <div className="ion-padding" slot="content">
-            Table of Contents
+              <CommentNavigator id={'right'} component="CommentBrief" query={query} ref={commentNavigator}></CommentNavigator>
             </div>
           </IonAccordion>
           <IonAccordion value="RelatedItems">
@@ -64,7 +69,7 @@ const Menu2: React.FC = () => {
               <IonLabel>Related Items</IonLabel>
             </IonItem>
             <div className="ion-padding" slot="content">
-            Saved Items
+              Saved Items
             </div>
           </IonAccordion>
           <IonAccordion value="Quality">
@@ -72,7 +77,7 @@ const Menu2: React.FC = () => {
               <IonLabel>Quality</IonLabel>
             </IonItem>
             <div className="ion-padding" slot="content">
-            Profile and Settings
+              Profile and Settings
             </div>
           </IonAccordion>
           <IonAccordion value="FollowingUsers">
@@ -80,7 +85,7 @@ const Menu2: React.FC = () => {
               <IonLabel>Following Users</IonLabel>
             </IonItem>
             <div className="ion-padding" slot="content">
-            <FollowingUsers></FollowingUsers>
+              <FollowingUsers></FollowingUsers>
             </div>
           </IonAccordion>
           <IonAccordion value="PublishedUsers">
@@ -88,7 +93,7 @@ const Menu2: React.FC = () => {
               <IonLabel>Published Users</IonLabel>
             </IonItem>
             <div className="ion-padding" slot="content">
-            <PublishedUsers></PublishedUsers>
+              <PublishedUsers></PublishedUsers>
             </div>
           </IonAccordion>
           <IonAccordion value="PublishedComments">
@@ -96,7 +101,7 @@ const Menu2: React.FC = () => {
               <IonLabel>Published Comments</IonLabel>
             </IonItem>
             <div className="ion-padding" slot="content">
-            Profile and Settings
+              Profile and Settings
             </div>
           </IonAccordion>
           <IonAccordion value="Profile">
@@ -104,7 +109,7 @@ const Menu2: React.FC = () => {
               <IonLabel>Profile</IonLabel>
             </IonItem>
             <div className="ion-padding" slot="content">
-            Profile
+              Profile
             </div>
           </IonAccordion>
           <IonAccordion value="Settings">
@@ -112,7 +117,7 @@ const Menu2: React.FC = () => {
               <IonLabel>Settings</IonLabel>
             </IonItem>
             <div className="ion-padding" slot="content">
-            Settings
+              Settings
             </div>
           </IonAccordion>
 

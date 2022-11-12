@@ -200,7 +200,7 @@ const HomeLayout: React.FC = () => {
 
         </div>
 
-        <CommentNavigator component={commentView} query={query} ref={commentNavigator}></CommentNavigator>
+        <CommentNavigator id={'main-' + parentCommentId} component={commentView} query={query} ref={commentNavigator}></CommentNavigator>
 
         <FloatingActionButtons addId={parentCommentId} saveId={parentCommentId}></FloatingActionButtons>
       </IonContent>

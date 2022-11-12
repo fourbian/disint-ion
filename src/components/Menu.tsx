@@ -13,11 +13,14 @@ import {
 } from '@ionic/react';
 
 import { useLocation } from 'react-router-dom';
-import { personOutline, archiveOutline, archiveSharp, homeOutline,  bookmarkOutline, heartOutline, heartSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, trashOutline, trashSharp, warningOutline, warningSharp } from 'ionicons/icons';
+import { personOutline, archiveOutline, archiveSharp, homeOutline, bookmarkOutline, heartOutline, heartSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, trashOutline, trashSharp, warningOutline, warningSharp } from 'ionicons/icons';
 import './Menu.css';
 import { CeramicPortal } from '../lib/ceramic/ceramic-portal';
 import config from '../config.json'
 import { useState } from 'react';
+import { CommentNavigator } from './comments/CommentNavigator';
+import { CommentQuery } from '../models/CommentQuery';
+import React from 'react';
 
 
 const Menu: React.FC = () => {
@@ -25,6 +28,9 @@ const Menu: React.FC = () => {
   const [loginName, setLoginName] = useState("");
   const [loginAddress, setLoginAddress] = useState("");
   let portal = CeramicPortal.getInstance(config.ceramicEndpoints);
+  let query = new CommentQuery();
+  let commentNavigator = React.createRef<CommentNavigator>();
+
 
   let connectWallet = async () => {
     await portal.authenticate();
@@ -65,7 +71,8 @@ const Menu: React.FC = () => {
               <IonLabel>Table of Contents</IonLabel>
             </IonItem>
             <div className="ion-padding" slot="content">
-            Table of Contents
+              <CommentNavigator id={'left'} component="CommentBrief" query={query} ref={commentNavigator}></CommentNavigator>
+
             </div>
           </IonAccordion>
           <IonAccordion value="second">
@@ -73,7 +80,7 @@ const Menu: React.FC = () => {
               <IonLabel>Saved Items</IonLabel>
             </IonItem>
             <div className="ion-padding" slot="content">
-            Saved Items
+              Saved Items
             </div>
           </IonAccordion>
         </IonAccordionGroup>
