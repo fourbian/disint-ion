@@ -43,9 +43,11 @@ const Menu: React.FC = () => {
   }
 
   // TODO: resizable: https://codepen.io/liamdebeasi/pen/KKdodjd
+  /*menu type of overlay breaks react beautiful dnd... of course.  If the side bar is over the main content, dnd lib doesn't know which one to drag over */
   return (
-    <IonMenu contentId="main" type="overlay" side="start">
-      <IonContent>
+    <IonMenu contentId="main" type="overlay" side={'start'} menuId={'start'}>
+      {/* IonContent breaks auto scrolling when dragging and dropping */}
+      <div style={{ overflowY: 'auto', overflowX: 'auto' }}>
         <IonList id="inbox-list">
           <IonListHeader>Inbox</IonListHeader>
           <IonNote>hi@ionicframework.com</IonNote>
@@ -93,7 +95,7 @@ const Menu: React.FC = () => {
             </IonItem>
           ))}
           </IonList>*/}
-      </IonContent>
+      </div>
     </IonMenu>
   );
 };

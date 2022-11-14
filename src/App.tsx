@@ -25,6 +25,8 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 import { DragDropContext } from 'react-beautiful-dnd';
+import { useMouseSensor, useTouchSensor } from 'react-beautiful-dnd';
+import { selectionService } from './services/SelectionService'
 
 console.log(process.env);
 
@@ -32,34 +34,16 @@ setupIonicReact();
 
 const App: React.FC = () => {
 
-  const onBeforeCapture = (one: any) => {
-    console.log("onBeforeCapture", one);
-  };
-
-  const onBeforeDragStart = (one: any) => {
-    console.log("onBeforeDragStart", one);
-  };
-
-  const onDragStart = (one: any, two: any) => {
-    console.log("onDragStart", one, two);
-  };
-
-  const onDragUpdate = (one: any, two: any) => {
-    console.log("onDragUpdate", one, two);
-  };
-
-  const onDragEnd = (one: any, two: any) => {
-    console.log("onDragEnd", one, two);
-  };
-
   return (
     <IonApp>
       <DragDropContext
-        onBeforeCapture={onBeforeCapture}
-        onBeforeDragStart={onBeforeDragStart}
-        onDragStart={onDragStart}
-        onDragUpdate={onDragUpdate}
-        onDragEnd={onDragEnd}
+        onBeforeCapture={selectionService.onBeforeCapture.bind(selectionService)}
+        onBeforeDragStart={selectionService.onBeforeDragStart.bind(selectionService)}
+        onDragStart={selectionService.onDragStart.bind(selectionService)}
+        onDragUpdate={selectionService.onDragUpdate.bind(selectionService)}
+        onDragEnd={selectionService.onDragEnd.bind(selectionService)}
+        enableDefaultSensors={false}
+        sensors={[useMouseSensor, useTouchSensor]}
       >
         <IonReactRouter>
           <IonSplitPane contentId="main">

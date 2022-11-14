@@ -45,8 +45,9 @@ const Menu2: React.FC = () => {
   }
 
   return (
-    <IonMenu contentId="main" type="overlay" side="end">
-      <IonContent>
+    <IonMenu contentId="main" type="reveal" side="end">
+      {/* IonContent breaks auto scrolling when dragging and dropping */}
+      <div style={{overflowY: 'auto', overflowX: 'auto'}}>
         <IonAccordionGroup>
           <IonAccordion value="DevUsers">
             <IonItem slot="header" color="light">
@@ -123,7 +124,7 @@ const Menu2: React.FC = () => {
 
         </IonAccordionGroup>
 
-      </IonContent>
+      </div>
     </IonMenu>
   );
 };

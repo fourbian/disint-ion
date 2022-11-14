@@ -17,7 +17,7 @@ import { LazyAvatar } from '../components/users/LazyAvatar';
 import { UserProfileComponent } from '../components/users/UserProfileComponent';
 import { CommentStandard } from '../components/comments/CommentStandard';
 import { PopoverButton } from '../components/shared/PopoverButton';
-import { popoverController } from '@ionic/core';
+import { menuController, popoverController } from '@ionic/core';
 import { CommentBrief } from '../components/comments/CommentBrief';
 import { CommentEditor } from '../components/comments/CommentEditor';
 import { arrowForwardCircle, saveOutline, sendOutline } from 'ionicons/icons';
@@ -26,6 +26,7 @@ import { serviceBus } from '../services/bus/ServiceBus';
 import { BeginNewCommentEvent } from '../services/bus/BeginNewCommentEvent';
 import { IServiceBusEvent } from '../services/bus/IServiceBusEvent';
 import { RequestAddCommentEvent } from '../services/bus/RequestAddCommentEvent';
+import { selectionService } from '../services/SelectionService';
 
 const HomeLayout: React.FC = () => {
 
@@ -135,7 +136,7 @@ const HomeLayout: React.FC = () => {
       <IonHeader>
         <IonToolbar>
           <IonButtons slot="start">
-            <IonMenuButton />
+            <IonMenuButton menu="start" />
           </IonButtons>
           <IonButtons slot="end">
             <IonMenuButton menu="end" />
@@ -144,7 +145,8 @@ const HomeLayout: React.FC = () => {
         </IonToolbar>
       </IonHeader>
 
-      <IonContent >
+      {/* IonContent breaks auto scrolling when dragging and dropping */}
+      <div style={{ overflowY: 'auto', overflowX: 'auto' }}>
         <div style={{ marginTop: "10px" }}></div>
         <IonHeader collapse="condense">
           <IonToolbar>
@@ -200,10 +202,11 @@ const HomeLayout: React.FC = () => {
 
         </div>
 
-        <CommentNavigator id={'main-' + parentCommentId} component={commentView} query={query} ref={commentNavigator}></CommentNavigator>
+        {/* Comment navigators that only exist on the main page could be duplicated because when ionic navigates it layers on this component so that there are multiple instances of it.  So, we need to distinguish the id by using the parentId.  This shouldn't be necessary in most other places that use CommentNavigator*/}
+        <CommentNavigator id={'main' + selectionService.separator + parentCommentId} component={commentView} query={query} ref={commentNavigator}></CommentNavigator>
 
         <FloatingActionButtons addId={parentCommentId} saveId={parentCommentId}></FloatingActionButtons>
-      </IonContent>
+      </div>
     </IonPage >
   );
 };

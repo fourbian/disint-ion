@@ -13,21 +13,6 @@ export class ServiceBus {
         this._serviceBusSubject.next(serviceBusEvent);
     }
 
-    emitBeginNewComment() {
-
-    }
-
-    emitEditExistingComment() {
-
-    }
-
-    emitRequestCreateComment() {
-
-    }
-
-    emitRequestSaveComment() {
-
-    }
 }
 
 export let serviceBus: ServiceBus = new ServiceBus();
