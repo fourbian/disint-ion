@@ -26,9 +26,12 @@ import { serviceBus } from '../services/bus/ServiceBus';
 import { BeginNewCommentEvent } from '../services/bus/BeginNewCommentEvent';
 import { IServiceBusEvent } from '../services/bus/IServiceBusEvent';
 import { RequestAddCommentEvent } from '../services/bus/RequestAddCommentEvent';
-import { selectionService } from '../services/SelectionService';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableItem } from '../components/test/SortableItem';
+import { selectionService } from '../services/dnd/SelectionService';
 
 const HomeLayout: React.FC = () => {
+  const [items, setItems] = useState([1, 2, 3]);
 
   let commentNavigator = React.createRef<CommentNavigator>();
   const params = useParams<{ commentId: string; }>();
@@ -148,6 +151,8 @@ const HomeLayout: React.FC = () => {
       {/* IonContent breaks auto scrolling when dragging and dropping */}
       <div style={{ overflowY: 'auto', overflowX: 'auto' }}>
         <div style={{ marginTop: "10px" }}></div>
+
+
         <IonHeader collapse="condense">
           <IonToolbar>
             <IonTitle size="large">{parentCommentId}</IonTitle>

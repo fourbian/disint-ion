@@ -26,25 +26,69 @@ import '@ionic/react/css/display.css';
 import './theme/variables.css';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { useMouseSensor, useTouchSensor } from 'react-beautiful-dnd';
-import { selectionService } from './services/SelectionService'
+import { closestCenter, DndContext, DragOverlay, KeyboardSensor, PointerSensor, TouchSensor, useDndMonitor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useState } from 'react';
+import { SortableItem } from './components/test/SortableItem';
+import { selectionService } from './services/dnd/SelectionService';
+import { createPortal } from 'react-dom';
 
 console.log(process.env);
 
 setupIonicReact();
 
+// TODO: if you need custom measuring: https://github.com/clauderic/dnd-kit/issues/830
 const App: React.FC = () => {
+  const [items, setItems] = useState([1, 2, 3]);
+  const sensors = useSensors(
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    }),
+    // may have to comment this out or put it in a conditional if testing in devtools or maybe devices.  It can conflict with TouchSensor.
+    //useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+  /*
+    return (
+      <DndContext
+        autoScroll={true}
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={selectionService.onDragStart.bind(selectionService)}
+        onDragMove={selectionService.onDragMove.bind(selectionService)}
+        onDragOver={selectionService.onDragOver.bind(selectionService)}
+        onDragEnd={selectionService.onDragEnd.bind(selectionService)}
+        onDragCancel={selectionService.onDragCancel.bind(selectionService)}
+  
+      >
+        <SortableContext
+          items={items}
+          strategy={verticalListSortingStrategy}
+        >
+          {items.map((id, index) => <SortableItem key={id} id={id} />)}
+        </SortableContext>
+      </DndContext>
+    )*/
 
   return (
     <IonApp>
-      <DragDropContext
-        onBeforeCapture={selectionService.onBeforeCapture.bind(selectionService)}
-        onBeforeDragStart={selectionService.onBeforeDragStart.bind(selectionService)}
+      <DndContext
+        autoScroll={true}
+        sensors={sensors}
+        collisionDetection={closestCenter}
         onDragStart={selectionService.onDragStart.bind(selectionService)}
-        onDragUpdate={selectionService.onDragUpdate.bind(selectionService)}
+        onDragMove={selectionService.onDragMove.bind(selectionService)}
+        onDragOver={selectionService.onDragOver.bind(selectionService)}
         onDragEnd={selectionService.onDragEnd.bind(selectionService)}
-        enableDefaultSensors={false}
-        sensors={[useMouseSensor, useTouchSensor]}
+        onDragCancel={selectionService.onDragCancel.bind(selectionService)}
+
       >
+
         <IonReactRouter>
           <IonSplitPane contentId="main">
 
@@ -63,7 +107,13 @@ const App: React.FC = () => {
             </IonRouterOutlet>
           </IonSplitPane>
         </IonReactRouter>
-      </DragDropContext>
+        {createPortal(
+          <DragOverlay >
+            overlay
+          </DragOverlay>,
+          document.body
+        )}
+      </DndContext>
 
     </IonApp>
   );

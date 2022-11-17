@@ -2,6 +2,8 @@
                <pre>
 TODO: 
 * https://github.com/atlassian/react-beautiful-dnd/issues/2300 set side menus to invisible to get beautiful dnd to recognize them?
+* restore ION stuff and see if dndkit works better than beautiful dnd did
+* fix z-index on drag and drop (devtools mobile, maybe non-devtools)
 * opening menus when close to sides in mobile mode
 * opening or toggling accordians while dragging
 * Dropping, copying, moving
@@ -14,6 +16,7 @@ import { sanitize } from 'dompurify';
 import './SelectionService.css'
 import { isMobile } from 'react-device-detect';
 import { menuController } from "@ionic/core";
+import { DragEndEvent, DragMoveEvent, DragOverEvent, DragStartEvent } from "@dnd-kit/core";
 
 export class SelectionService {
     innerClone: any;
@@ -59,37 +62,65 @@ export class SelectionService {
         this.setClass(id, "dnd-drop-target-item");
     }
 
-    onBeforeCapture(before: BeforeCapture) {
-        //console.log("onBeforeCapture", before);
+    onDragStart(event: DragStartEvent): void {
+        console.log("onDragStart", event);
+
     }
 
-    onBeforeDragStart(initial: DragStart) {
-        //console.log("onBeforeDragStart", initial);
+    onDragMove(event: DragMoveEvent): void {
+        console.log("onDragMove", event);
+
     }
 
-    onDragStart(initial: DragStart, provided: ResponderProvided) {
-        //console.log("onDragStart", initial, provided);
-        this.isDragging = true;
+    onDragOver(event: DragOverEvent): void {
+        console.log("onDragOver", event);
+
     }
 
-    onDragUpdate(initial: DragUpdate, provided: ResponderProvided) {
-        //console.log("onDragUpdate", initial, provided);
-        const droppableContainerId = initial.destination?.droppableId || "";
-        this.setDroppableContainerStyling(droppableContainerId);
-        const droppableItemId = initial.combine?.draggableId || "";
-        this.setDroppableItemStyling(droppableItemId);
+    onDragEnd(event: DragEndEvent): void {
+        console.log("onDragEnd", event);
+
     }
 
-    onDragEnd(result: DropResult, provided: ResponderProvided) {
-        this.innerClone = null;
-        this.isDragging = false;
-        this.setDroppableContainerStyling("");
-        this.setDroppableItemStyling("");
-        //console.log("onDragEnd", result, provided);
-    };
+    onDragCancel(): void {
+        console.log("onDragCancel");
 
+    }
+    /*
+        onBeforeCapture(before: BeforeCapture) {
+            //this.openMenu(true, 'start');
+            //console.log("onBeforeCapture", before);
+        }
+    
+        onBeforeDragStart(initial: DragStart) {
+            //console.log("onBeforeDragStart", initial);
+        }
+    
+        onDragStart(initial: DragStart, provided: ResponderProvided) {
+            //console.log("onDragStart", initial, provided);
+            this.isDragging = true;
+        }
+    
+        onDragUpdate(initial: DragUpdate, provided: ResponderProvided) {
+            //console.log("onDragUpdate", initial, provided);
+            const droppableContainerId = initial.destination?.droppableId || "";
+            this.setDroppableContainerStyling(droppableContainerId);
+            const droppableItemId = initial.combine?.draggableId || "";
+            this.setDroppableItemStyling(droppableItemId);
+        }
+    
+        onDragEnd(result: DropResult, provided: ResponderProvided) {
+            this.innerClone = null;
+            this.isDragging = false;
+            this.setDroppableContainerStyling("");
+            this.setDroppableItemStyling("");
+            //console.log("onDragEnd", result, provided);
+        };
+    */
     getInnerClone(domId: string, provided: DraggableProvided, componentFunc: (domId: string, provided: DraggableProvided) => JSX.Element) {
         const notFound = <div className="dnd-inner-clone">Not Found</div>;
+        return notFound;
+        /*
         if (!componentFunc) { // Approach 1: clone the HTML node.  Do we need to sanitize?  If so, it ruins the styling
             const domNode = domId ? document.querySelector(`#${domId}`) : null;
             if (!domNode) {
@@ -101,6 +132,7 @@ export class SelectionService {
         } else { // Aproach 2: just new up a component using the function passed in, and leave the rendering up to the caller
             return <div className="dnd-inner-clone">{componentFunc(domId, provided) || notFound}</div>
         }
+        */
     }
 
     getOuterClone(componentFunc: (domId: string, provided: DraggableProvided) => JSX.Element, provided: DraggableProvided, snapshot: DraggableStateSnapshot, rubric: DraggableRubric) {
