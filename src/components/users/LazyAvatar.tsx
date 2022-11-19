@@ -33,7 +33,7 @@ export class LazyAvatar extends React.Component<LazyAvatarProps, LazyAvatarState
   loadUserId: string;
 
   async loadUser() {
-    if (this.loadUserId != this.props.userId) {
+    if (this.props.userId && this.loadUserId != this.props.userId) {
       this.loadUserId = this.props.userId;
       const user = await userService.readProfile(this.loadUserId);
       this.setState({ user });
@@ -46,6 +46,6 @@ export class LazyAvatar extends React.Component<LazyAvatarProps, LazyAvatarState
       <IonAvatar slot="start" style={{ marginBottom: 'auto', marginTop: '2px', flexShrink: '0' }}>
         <img src={this.state?.user?.avatar} />
       </IonAvatar>
-    </> || <span>wtf</span>;
+    </> || <span>avatar</span>;
   }
 } 

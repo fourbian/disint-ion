@@ -26,33 +26,62 @@ import '@ionic/react/css/display.css';
 import './theme/variables.css';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { useMouseSensor, useTouchSensor } from 'react-beautiful-dnd';
-import { closestCenter, DndContext, DragOverlay, KeyboardSensor, PointerSensor, TouchSensor, useDndMonitor, useSensor, useSensors } from '@dnd-kit/core';
+import { CancelDrop, closestCenter, defaultDropAnimationSideEffects, DndContext, DragEndEvent, DragOverlay, DragStartEvent, DropAnimation, KeyboardSensor, MeasuringStrategy, MouseSensor, PointerSensor, TouchSensor, useDndMonitor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { SortableItem } from './components/test/SortableItem';
 import { selectionService } from './services/dnd/SelectionService';
 import { createPortal } from 'react-dom';
+import { coordinateGetter } from './components/test/MultipleContainersKeyboardCoordinates';
+import { CommentNavigatorItem } from './components/comments/CommentNavigatorItem';
 
-console.log(process.env);
+//console.log(process.env);
+
+
+const dropAnimation: DropAnimation = {
+  sideEffects: defaultDropAnimationSideEffects({
+    styles: {
+      active: {
+        opacity: '0.5',
+      },
+    },
+  }),
+};
 
 setupIonicReact();
 
 // TODO: if you need custom measuring: https://github.com/clauderic/dnd-kit/issues/830
 const App: React.FC = () => {
-  const [items, setItems] = useState([1, 2, 3]);
   const sensors = useSensors(
+    useSensor(MouseSensor),
     useSensor(TouchSensor, {
       activationConstraint: {
         delay: 250,
         tolerance: 5,
       },
     }),
-    // may have to comment this out or put it in a conditional if testing in devtools or maybe devices.  It can conflict with TouchSensor.
-    //useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
+      coordinateGetter,
     })
   );
+
+  const [activeId, setActiveId] = useState("");
+
+  const onDragStart = (event: DragStartEvent): void => {
+    selectionService.onDragStart(event);
+
+    let active = event.active
+    setActiveId(active.id.toString());
+  }
+
+  const onDragEnd = (event: DragEndEvent): void => {
+    selectionService.onDragEnd(event);
+
+    setActiveId("");
+  }
+
+
+
   /*
     return (
       <DndContext
@@ -73,20 +102,25 @@ const App: React.FC = () => {
           {items.map((id, index) => <SortableItem key={id} id={id} />)}
         </SortableContext>
       </DndContext>
-    )*/
+  )*/
+  //        collisionDetection={selectionService.collisionDetectionStrategy}
 
   return (
     <IonApp>
+
       <DndContext
-        autoScroll={true}
         sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragStart={selectionService.onDragStart.bind(selectionService)}
+        measuring={{
+          droppable: {
+            strategy: MeasuringStrategy.Always,
+          },
+        }}
+        onDragStart={onDragStart}
         onDragMove={selectionService.onDragMove.bind(selectionService)}
         onDragOver={selectionService.onDragOver.bind(selectionService)}
-        onDragEnd={selectionService.onDragEnd.bind(selectionService)}
+        onDragEnd={onDragEnd}
         onDragCancel={selectionService.onDragCancel.bind(selectionService)}
-
+        modifiers={selectionService.modifiers}
       >
 
         <IonReactRouter>
@@ -106,13 +140,13 @@ const App: React.FC = () => {
               </Route>
             </IonRouterOutlet>
           </IonSplitPane>
+          {createPortal(
+            <DragOverlay >
+              <CommentNavigatorItem domId={activeId}></CommentNavigatorItem>
+            </DragOverlay>,
+            document.body
+          )}
         </IonReactRouter>
-        {createPortal(
-          <DragOverlay >
-            overlay
-          </DragOverlay>,
-          document.body
-        )}
       </DndContext>
 
     </IonApp>

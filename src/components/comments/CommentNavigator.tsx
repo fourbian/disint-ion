@@ -13,7 +13,7 @@ import { SortableItem } from "../test/SortableItem";
 import { DragOverlay } from "@dnd-kit/core";
 import { selectionService } from "../../services/dnd/SelectionService";
 import { Droppable } from "../../services/dnd/Droppable";
-import { MultipleContainers } from "../test/SortableTest";
+import { createPortal } from "react-dom";
 
 class CommentNavigatorProps {
     query: CommentQuery;
@@ -69,16 +69,16 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
         return this.props.id + selectionService.separator + comment.id;
     }
 
-    render() {
-        return <MultipleContainers vertical={true}></MultipleContainers>
-    }
-/*
+    /*render() {
+        return <MultipleContainers vertical={true} id={this.props.id}></MultipleContainers>
+    }*/
+
     render() {
         this.reloadCommentsIfQueryChanged();
 
         return (
             <div>
-                <SortableContext
+                {/*<SortableContext
                     items={this.items}
                     strategy={verticalListSortingStrategy}
                 >
@@ -95,21 +95,23 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
                         {this.items2.map((id, index) => <SortableItem key={id} id={id} />)}
                     </Droppable>
                 </SortableContext>
+        */}
 
                 <SortableContext items={this.state.comments.map(c => this.domId(c))} strategy={verticalListSortingStrategy}>
-                    <Droppable id="two">
+                    <Droppable id={this.props.id}>
                         {this.state.comments?.map((c, index) => {
                             let domId = this.domId(c);
                             //let domId = index.toString();
                             //let domId = c.id;
                             //console.log("using id", domId);
-                            return <CommentNavigatorItem domId={domId} key={c.id} comment={c} component={this.props.component}></CommentNavigatorItem>
+                            return <CommentNavigatorItem overlay={true} domId={domId} key={c.id} comment={c} component={this.props.component}></CommentNavigatorItem>
                         })}
                     </Droppable>
                 </SortableContext>
+
             </div>
         )
 
     }
-    */
+
 }

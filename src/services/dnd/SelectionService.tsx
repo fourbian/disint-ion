@@ -11,12 +11,11 @@ TODO:
 * Keyboard navigation and selecting multiple
        </pre>*/
 
-import { BeforeCapture, DraggableProvided, DraggableRubric, DraggableStateSnapshot, DragStart, DragUpdate, DropResult, ResponderProvided } from "react-beautiful-dnd";
-import { sanitize } from 'dompurify';
 import './SelectionService.css'
 import { isMobile } from 'react-device-detect';
 import { menuController } from "@ionic/core";
-import { DragEndEvent, DragMoveEvent, DragOverEvent, DragStartEvent } from "@dnd-kit/core";
+import { CancelDrop, closestCenter, CollisionDetection, DragEndEvent, DragMoveEvent, DragOverEvent, DragStartEvent, DroppableContainer, getFirstCollision, Modifiers, pointerWithin, rectIntersection } from "@dnd-kit/core";
+import { CancelDropArguments } from "@dnd-kit/core/dist/components/DndContext/DndContext";
 
 export class SelectionService {
     innerClone: any;
@@ -24,14 +23,26 @@ export class SelectionService {
     lastDroppableItemId: string = "";
     separator = "_-_";
     isDragging: boolean;
+    activeId: string;
+    containers: string[];
     leftMenuOpen: boolean;
     rightMenuOpen: boolean;
+    TRASH_ID = 'void';
+    PLACEHOLDER_ID = 'placeholder';
+    lastOverId: string;
+    recentlyMovedToNewContainer = false;
+    modifiers?: Modifiers;
 
     constructor() {
         window.addEventListener('mousemove', this.dragMoved.bind(this));
         window.addEventListener('touchmove', this.dragMoved.bind(this));
     }
 
+    getActiveId() {
+        console.log("activeId:", this.activeId);
+        return this.activeId;
+    }
+    
     clearClass(id: string, className: string) {
         if (!id) return;
         const node = document.querySelector(`#${id}`);
@@ -63,29 +74,127 @@ export class SelectionService {
     }
 
     onDragStart(event: DragStartEvent): void {
-        console.log("onDragStart", event);
-
+        let active = event.active
+        this.activeId = active.id.toString();
+        console.log("onDragStart", event, this.activeId);
     }
 
     onDragMove(event: DragMoveEvent): void {
-        console.log("onDragMove", event);
+        //console.log("onDragMove", event);
 
     }
 
     onDragOver(event: DragOverEvent): void {
-        console.log("onDragOver", event);
+        //console.log("onDragOver", event);
+        let over = event.over;
+        let active = event.active;
+        const overId = over?.id;
+
+
+
+        if (overId == null || overId === this.TRASH_ID) {
+            return;
+        }
+
+        console.log(overId, ...(event.collisions || []).map(c => c.id));
+        /*
+        const overContainer = this.findContainer(overId);
+        const activeContainer = this.findContainer(active.id);
+
+        if (!overContainer || !activeContainer) {
+            return;
+        }
+
+        if (activeContainer !== overContainer) {
+            //this.items = this.getUpdatedItems(activeContainer, overContainer, event);
+        }
+        */
 
     }
 
     onDragEnd(event: DragEndEvent): void {
         console.log("onDragEnd", event);
+        this.activeId = "";
+        /*
+        if (active.id in this.items && over?.id) {
+            const activeIndex = this.containers.indexOf(active.id);
+            const overIndex = this.containers.indexOf(over.id);
+            this.containers = arrayMove(this.containers, activeIndex, overIndex);
+        }
 
+        const activeContainer = this.findContainer(active.id);
+
+        if (!activeContainer) {
+            this.activeId = "";
+            return;
+        }
+
+        const overId = over?.id;
+
+        if (overId == null) {
+            this.activeId = "";
+            return;
+        }
+
+        if (overId === this.TRASH_ID) {
+            this.items = {
+                ...this.items,
+                [activeContainer]: this.items[activeContainer].filter(
+                    (id) => id !== this.activeId
+                ),
+            };
+            this.activeId = "";
+            return;
+        }
+
+        if (overId === this.PLACEHOLDER_ID) {
+            const newContainerId = this.getNextContainerId();
+
+            this.containers = [...this.containers, newContainerId];
+            this.items = {
+                ...this.items,
+                [activeContainer]: this.items[activeContainer].filter(
+                    (id) => id !== this.activeId
+                ),
+                [newContainerId]: [active.id],
+            };
+            this.activeId = "";
+            return;
+        }
+
+        const overContainer = this.findContainer(overId);
+
+        if (overContainer) {
+            const activeIndex = this.items[activeContainer].indexOf(active.id);
+            const overIndex = this.items[overContainer].indexOf(overId);
+
+            if (activeIndex !== overIndex) {
+                this.items = {
+                    ...this.items,
+                    [overContainer]: arrayMove(
+                        this.items[overContainer],
+                        activeIndex,
+                        overIndex
+                    ),
+                };
+            }
+        }
+
+        this.activeId = "";
+        */
     }
 
     onDragCancel(): void {
-        console.log("onDragCancel");
-
+        this.activeId = "";
     }
+
+    cancelDrop: CancelDrop = (args: CancelDropArguments): boolean | Promise<boolean> => {
+        console.log("cancelDrop", args);
+        return false;
+        //throw new Error("Not sure what to do here?  Always return false?");
+    }
+
+
     /*
         onBeforeCapture(before: BeforeCapture) {
             //this.openMenu(true, 'start');
@@ -117,37 +226,6 @@ export class SelectionService {
             //console.log("onDragEnd", result, provided);
         };
     */
-    getInnerClone(domId: string, provided: DraggableProvided, componentFunc: (domId: string, provided: DraggableProvided) => JSX.Element) {
-        const notFound = <div className="dnd-inner-clone">Not Found</div>;
-        return notFound;
-        /*
-        if (!componentFunc) { // Approach 1: clone the HTML node.  Do we need to sanitize?  If so, it ruins the styling
-            const domNode = domId ? document.querySelector(`#${domId}`) : null;
-            if (!domNode) {
-                return notFound;
-            } else {
-                const sanitizedHtml = sanitize(domNode.outerHTML);
-                return <div className="dnd-inner-clone" dangerouslySetInnerHTML={{ __html: sanitizedHtml }}></div>;
-            }
-        } else { // Aproach 2: just new up a component using the function passed in, and leave the rendering up to the caller
-            return <div className="dnd-inner-clone">{componentFunc(domId, provided) || notFound}</div>
-        }
-        */
-    }
-
-    getOuterClone(componentFunc: (domId: string, provided: DraggableProvided) => JSX.Element, provided: DraggableProvided, snapshot: DraggableStateSnapshot, rubric: DraggableRubric) {
-        if (!this.innerClone) {
-            this.innerClone = this.getInnerClone(rubric.draggableId, provided, componentFunc);
-        }
-
-        return <div className="dnd-outer-clone"
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-            ref={provided.innerRef}
-        >
-            {this.innerClone}
-        </div>
-    }
 
     getCoordinates(e: any): { x: any, y: any } {
         let x, y;
@@ -282,6 +360,188 @@ export class SelectionService {
         //console.log('enabled', await this.menuController.isEnabled('end'));
         //console.log('open', await this.menuController.isOpen('end'));
     }
+
+
+
+    //   Custom collision detection strategy optimized for multiple containers
+
+    //   - First, find any droppable containers intersecting with the pointer.
+    //   - If there are none, find intersecting containers with the active draggable.
+    //   - If there are no intersecting containers, return the last matched intersection
+
+
+    // TODO: memoize bsed on activeId and items
+    /*collisionDetectionStrategy: CollisionDetection = (args) => {
+        if (this.activeId && this.activeId in this.items) {
+            return closestCenter({
+                ...args,
+                droppableContainers: args.droppableContainers.filter(
+                    (container: DroppableContainer) => container.id in this.items
+                ),
+            });
+        }
+
+        // Start by finding any intersecting droppable
+        const pointerIntersections = pointerWithin(args);
+        const intersections =
+            pointerIntersections.length > 0
+                ? // If there are droppables intersecting with the pointer, return those
+                pointerIntersections
+                : rectIntersection(args);
+        let overId = getFirstCollision(intersections, 'id');
+
+        if (overId != null) {
+            if (overId === this.TRASH_ID) {
+                // If the intersecting droppable is the trash, return early
+                // Remove this if you're not using trashable functionality in your app
+                return intersections;
+            }
+
+            if (overId in this.items) {
+                const containerItems = this.items[overId];
+
+                // If a container is matched and it contains items (columns 'A', 'B', 'C')
+                if (containerItems.length > 0) {
+                    // Return the closest droppable within that container
+                    overId = closestCenter({
+                        ...args,
+                        droppableContainers: args.droppableContainers.filter(
+                            (container) =>
+                                container.id !== overId &&
+                                containerItems.includes(container.id)
+                        ),
+                    })[0]?.id;
+                }
+            }
+
+            this.lastOverId = overId;
+
+            return [{ id: overId }];
+        }
+
+        // When a draggable item moves to a new container, the layout may shift
+        // and the `overId` may become `null`. We manually set the cached `lastOverId`
+        // to the id of the draggable item that was moved to the new container, otherwise
+        // the previous `overId` will be returned which can cause items to incorrectly shift positions
+        if (this.recentlyMovedToNewContainer) {
+            this.lastOverId = this.activeId;
+        }
+
+        // If no droppable is matched, return the last match
+        return this.lastOverId ? [{ id: this.lastOverId }] : [];
+    }
+
+
+    register(id: string, items: Items, containers: string[], callback: ContextCallback) {
+
+        this.contexts.set(id, {
+            id,
+            items,
+            containers,
+            callback
+        });
+
+        // remove old containers
+        this.containers = this.containers.filter(c => !c.toString().startsWith(id));
+
+        // remove old items
+        
+        items = {
+            ...this.items,
+            [activeContainer]: this.items[activeContainer].filter(
+                (id) => id !== this.activeId
+            ),
+        };
+        
+        // remove all items and containers that start with id
+
+        // add new items
+
+        // add new containers
+
+
+        throw new Error('Method not implemented.');
+    }
+
+    getIndex(id: string) {
+        const container = this.findContainer(id);
+
+        if (!container) {
+            return -1;
+        }
+
+        const index = this.items[container].indexOf(id);
+
+        return index;
+    };
+
+
+
+    getUpdatedItems(activeContainer: string, overContainer: string, event: DragOverEvent): Items {
+        const over = event.over;
+        const overId = event.over?.id || "";
+        const active = event.active;
+
+        const activeItems = this.items[activeContainer];
+        const overItems = this.items[overContainer];
+        const overIndex = overItems.indexOf(overId);
+        const activeIndex = activeItems.indexOf(active.id);
+
+        let newIndex: number;
+
+        if (overId in this.items) {
+            newIndex = overItems.length + 1;
+        } else {
+            const isBelowOverItem =
+                over &&
+                active.rect.current.translated &&
+                active.rect.current.translated.top >
+                over.rect.top + over.rect.height;
+
+            const modifier = isBelowOverItem ? 1 : 0;
+
+            newIndex =
+                overIndex >= 0 ? overIndex + modifier : overItems.length + 1;
+        }
+
+        this.recentlyMovedToNewContainer = true;
+
+        return {
+            ...this.items,
+            [activeContainer]: this.items[activeContainer].filter(
+                (item) => item !== active.id
+            ),
+            [overContainer]: [
+                ...this.items[overContainer].slice(0, newIndex),
+                this.items[activeContainer][activeIndex],
+                ...this.items[overContainer].slice(
+                    newIndex,
+                    this.items[overContainer].length
+                ),
+            ],
+        };
+    }
+
+
+
+    findContainer(id: string) {
+        if (id in this.items) {
+            return id;
+        }
+
+        // TODO: OPTIMIZE: can we make any assumptions here rather than searching all properties?
+        return Object.keys(this.items).find((key) => this.items[key].includes(id));
+    };
+
+
+    getNextContainerId() {
+        // TODO: can we eliminate containerIds if we're just going to get containerIds from this.items?
+        const containerIds = Object.keys(this.items);
+        const lastContainerId = containerIds[containerIds.length - 1];
+
+        return String.fromCharCode(lastContainerId.charCodeAt(0) + 1);
+    }
+    */
 
 }
 
