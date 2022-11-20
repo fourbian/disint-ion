@@ -17,6 +17,16 @@ import { menuController } from "@ionic/core";
 import { CancelDrop, closestCenter, CollisionDetection, DragEndEvent, DragMoveEvent, DragOverEvent, DragStartEvent, DroppableContainer, getFirstCollision, Modifiers, pointerWithin, rectIntersection } from "@dnd-kit/core";
 import { CancelDropArguments } from "@dnd-kit/core/dist/components/DndContext/DndContext";
 
+export interface DraggableItem {
+    id: string;
+}
+
+export class ContainerContext {
+    id: string;
+    items: DraggableItem[] = [];
+    onNewItems: (items: DraggableItem[]) => boolean;
+}
+
 export class SelectionService {
     innerClone: any;
     lastDroppableContainerId: string = "";
@@ -24,7 +34,6 @@ export class SelectionService {
     separator = "_-_";
     isDragging: boolean;
     activeId: string;
-    containers: string[];
     leftMenuOpen: boolean;
     rightMenuOpen: boolean;
     TRASH_ID = 'void';
@@ -32,17 +41,31 @@ export class SelectionService {
     lastOverId: string;
     recentlyMovedToNewContainer = false;
     modifiers?: Modifiers;
+    containers = new Map<string, ContainerContext>();
 
     constructor() {
         window.addEventListener('mousemove', this.dragMoved.bind(this));
         window.addEventListener('touchmove', this.dragMoved.bind(this));
     }
 
+    registerContainer(id: string, items: DraggableItem[], onNewItems: (items: DraggableItem[]) => boolean) {
+        const container = new ContainerContext();
+        container.id = id;
+        container.items = items;
+        container.onNewItems = onNewItems;
+
+        this.containers.set(id, container);
+    }
+
+    unregisterContainer(id: string) {
+        this.containers.delete(id);
+    }
+
     getActiveId() {
         console.log("activeId:", this.activeId);
         return this.activeId;
     }
-    
+
     clearClass(id: string, className: string) {
         if (!id) return;
         const node = document.querySelector(`#${id}`);
@@ -85,30 +108,69 @@ export class SelectionService {
     }
 
     onDragOver(event: DragOverEvent): void {
-        //console.log("onDragOver", event);
-        let over = event.over;
-        let active = event.active;
-        const overId = over?.id;
+        const over = event.over;
+        const active = event.active;
+        const overContainerId = event.over?.id?.toString().split(this.separator)[0];
+        const activeContainerId = event.active?.id?.toString().split(this.separator)[0];
+        const overItemId = event.over?.id?.toString().split(this.separator).at(-1);
+        const activeItemId = event.active?.id?.toString().split(this.separator).at(-1);
+        //const activeData = event.active.data.current
 
-
-
-        if (overId == null || overId === this.TRASH_ID) {
+        if (overContainerId == null) {
             return;
         }
 
-        console.log(overId, ...(event.collisions || []).map(c => c.id));
-        /*
-        const overContainer = this.findContainer(overId);
-        const activeContainer = this.findContainer(active.id);
+        console.log("onDragOver", activeContainerId, overContainerId);
+
+        const overContainer = this.containers.get(overContainerId);
+        const activeContainer = this.containers.get(activeContainerId);
 
         if (!overContainer || !activeContainer) {
             return;
         }
 
-        if (activeContainer !== overContainer) {
-            //this.items = this.getUpdatedItems(activeContainer, overContainer, event);
+        console.log("detected")
+        if (activeContainerId !== overContainerId) {
+            const overItems = overContainer.items.slice();
+            const activeItems = activeContainer.items.slice();
+            const overIndex = overContainer.items.findIndex(o => o.id == overItemId);
+            const activeIndex = activeContainer.items.findIndex(a => a.id == activeItemId);
+
+            let newIndex: number;
+
+            const isBelowOverItem =
+                over &&
+                active.rect.current.translated &&
+                active.rect.current.translated.top >
+                over.rect.top + over.rect.height;
+
+            const modifier = isBelowOverItem ? 1 : 0;
+
+            newIndex =
+                overIndex >= 0 ? overIndex + modifier : overContainer.items.length + 1;
+
+            //recentlyMovedToNewContainer.current = true;
+
+            console.log("moving from", activeContainer.id, activeIndex, " to ", overContainer.id, overIndex);
+            console.log("moving from", activeContainer.id, activeItemId, " to ", overContainer.id, overItemId);
+
+            if (activeIndex > -1) {
+                // add active item to over container
+                overItems.splice(newIndex, 0, activeItems[activeIndex])
+                if (overContainer.onNewItems(overItems)) {
+                    console.log("new overContainer list", overItems);
+                    overContainer.items = overItems; // callee approves update
+                }
+
+                // remove active item from active container
+                activeItems.splice(activeIndex, 1);
+                if (activeContainer.onNewItems(activeItems)) {
+                    console.log("new activeContainer list", overItems);
+                    activeContainer.items = activeItems; // callee approves update
+                }
+
+            }
         }
-        */
 
     }
 
