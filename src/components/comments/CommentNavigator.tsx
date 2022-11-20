@@ -11,7 +11,7 @@ import {
 import { CommentNavigatorItem } from "./CommentNavigatorItem";
 import { SortableItem } from "../test/SortableItem";
 import { DragOverlay } from "@dnd-kit/core";
-import { selectionService } from "../../services/dnd/SelectionService";
+import { DraggableItem, selectionService } from "../../services/dnd/SelectionService";
 import { Droppable } from "../../services/dnd/Droppable";
 import { createPortal } from "react-dom";
 
@@ -27,8 +27,6 @@ class CommentNavigatorState {
 }
 
 export class CommentNavigator extends React.Component<CommentNavigatorProps, CommentNavigatorState> {
-    items = [2, 3, 4];
-    items2 = [5, 6, 7];
     _loading = false;
     _lastUsedQuery: CommentQuery;
     innerClone: JSX.Element;
@@ -40,6 +38,17 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
 
     async componentDidMount() {
         await this.loadComments();
+
+
+    }
+
+    async componentWillUnmount() {
+
+    }
+
+    onDragUpdate(comments: DraggableItem[]): boolean {
+        this.setState({comments: comments as any});
+        return true;
     }
 
     async loadComments() {
@@ -50,6 +59,8 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
         const comments = await commentQueryService.query(this.props.query);
 
         this.setState({ comments });
+
+        selectionService.registerContainer(this.props.id, comments, this.onDragUpdate.bind(this));
 
         this._loading = false;
     }

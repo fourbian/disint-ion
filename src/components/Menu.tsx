@@ -21,6 +21,7 @@ import { useState } from 'react';
 import { CommentNavigator } from './comments/CommentNavigator';
 import { CommentQuery } from '../models/CommentQuery';
 import React from 'react';
+import { userService } from '../services/users/UserService';
 
 
 const Menu: React.FC = () => {
@@ -28,7 +29,7 @@ const Menu: React.FC = () => {
   const [loginName, setLoginName] = useState("");
   const [loginAddress, setLoginAddress] = useState("");
   let portal = CeramicPortal.getInstance(config.ceramicEndpoints);
-  let query = new CommentQuery();
+  let query = new CommentQuery(userService).parentOrTopLevel("");
   let commentNavigator = React.createRef<CommentNavigator>();
 
 
