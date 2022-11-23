@@ -33,7 +33,9 @@ export class SelectionService {
     lastDroppableItemId: string = "";
     separator = "_-_";
     isDragging: boolean;
-    activeId: string;
+    activeContainerId: string;
+    activeItemId: string;
+    activeDomId: string;
     leftMenuOpen: boolean;
     rightMenuOpen: boolean;
     TRASH_ID = 'void';
@@ -62,8 +64,8 @@ export class SelectionService {
     }
 
     getActiveId() {
-        console.log("activeId:", this.activeId);
-        return this.activeId;
+        console.log("activeId:", this.activeDomId);
+        return this.activeDomId;
     }
 
     clearClass(id: string, className: string) {
@@ -98,8 +100,10 @@ export class SelectionService {
 
     onDragStart(event: DragStartEvent): void {
         let active = event.active
-        this.activeId = active.id.toString();
-        console.log("onDragStart", event, this.activeId);
+        this.activeDomId = active.id.toString();
+        this.activeItemId = active.data?.current?.itemId;
+        this.activeContainerId = active.data.current?.containerId;
+        console.log("onDragStart", event, this.activeDomId);
     }
 
     onDragMove(event: DragMoveEvent): void {
@@ -110,17 +114,17 @@ export class SelectionService {
     onDragOver(event: DragOverEvent): void {
         const over = event.over;
         const active = event.active;
-        const overContainerId = event.over?.id?.toString().split(this.separator)[0];
-        const activeContainerId = event.active?.id?.toString().split(this.separator)[0];
-        const overItemId = event.over?.id?.toString().split(this.separator).at(-1);
-        const activeItemId = event.active?.id?.toString().split(this.separator).at(-1);
+        const overContainerId = event.over?.data?.current?.containerId;
+        const activeContainerId = event.active?.data?.current?.containerId;
+        const overDomId = event.over?.id?.toString();
+        const activeDomId = event.active?.id?.toString();
         //const activeData = event.active.data.current
 
         if (overContainerId == null) {
             return;
         }
 
-        console.log("onDragOver", activeContainerId, overContainerId);
+        console.log("onDragOver", activeContainerId, activeDomId, overContainerId, overDomId);
 
         const overContainer = this.containers.get(overContainerId);
         const activeContainer = this.containers.get(activeContainerId);
@@ -131,10 +135,10 @@ export class SelectionService {
 
         console.log("detected")
         if (activeContainerId !== overContainerId) {
-            const overItems = overContainer.items.slice();
-            const activeItems = activeContainer.items.slice();
-            const overIndex = overContainer.items.findIndex(o => o.id == overItemId);
-            const activeIndex = activeContainer.items.findIndex(a => a.id == activeItemId);
+            const overDomIds = event.over?.data?.current?.sortable?.items || [];
+            const activeDomIds = event.active?.data?.current?.sortable?.items || [];
+            const overIndex = overDomIds.indexOf(overDomId);
+            const activeIndex = activeDomIds.indexOf(activeDomId);
 
             let newIndex: number;
 
@@ -147,17 +151,21 @@ export class SelectionService {
             const modifier = isBelowOverItem ? 1 : 0;
 
             newIndex =
-                overIndex >= 0 ? overIndex + modifier : overContainer.items.length + 1;
+                overIndex >= 0 ? overIndex + modifier : overDomIds.length + 1;
 
             //recentlyMovedToNewContainer.current = true;
 
+            console.log("active item id", this.activeItemId, "active dom id", this.activeDomId);
             console.log("moving from", activeContainer.id, activeIndex, " to ", overContainer.id, overIndex);
-            console.log("moving from", activeContainer.id, activeItemId, " to ", overContainer.id, overItemId);
+            console.log("moving from", activeContainer.id, activeDomId, " to ", overContainer.id, overDomId);
 
             if (activeIndex > -1) {
-                // add active item to over container
+                const overItems = overContainer.items.slice();
+                const activeItems = activeContainer.items.slice();
+                    // add active item to over container
                 overItems.splice(newIndex, 0, activeItems[activeIndex])
                 if (overContainer.onNewItems(overItems)) {
+                    (activeItems[activeIndex] as any)._dragDomId = activeDomId;
                     console.log("new overContainer list", overItems);
                     overContainer.items = overItems; // callee approves update
                 }
@@ -176,7 +184,7 @@ export class SelectionService {
 
     onDragEnd(event: DragEndEvent): void {
         console.log("onDragEnd", event);
-        this.activeId = "";
+        this.activeDomId = "";
         /*
         if (active.id in this.items && over?.id) {
             const activeIndex = this.containers.indexOf(active.id);
@@ -247,7 +255,7 @@ export class SelectionService {
     }
 
     onDragCancel(): void {
-        this.activeId = "";
+        this.activeDomId = "";
     }
 
     cancelDrop: CancelDrop = (args: CancelDropArguments): boolean | Promise<boolean> => {

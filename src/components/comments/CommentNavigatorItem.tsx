@@ -18,7 +18,9 @@ import { selectionService } from "../../services/dnd/SelectionService";
 
 class CommentNavigatorItemProps {
     comment?: DisintComment<any>;
+    commentId?: string;
     component?: string;
+    containerId: string;
     domId: string;
     overlay?: boolean = false;
 }
@@ -33,17 +35,15 @@ export const CommentNavigatorItem: React.FC<CommentNavigatorItemProps> = (props)
         setNodeRef,
         transform,
         transition,
-    } = useSortable({ id: props.domId });
+    } = useSortable({ id: props.domId || "", data: { itemId: props.comment?.id || "", containerId: props.containerId } });
 
     const [comment, setComment] = useState<DisintComment<any> | undefined>(props.comment);
 
-    if (!comment) console.log("current dragId", selectionService.activeId, props.domId, component);
-    if (!comment && props.domId) {
+    if (!comment) console.log("current dragId", selectionService.activeDomId, props.commentId, component);
+    if (!comment && props.commentId) {
 
         // TODO: load up component view somehow?  look at target container, or source dnd item to determine which view to use?
-        const id = props.domId.split(selectionService.separator).at(-1) || "";
-        console.log("splitting", "****")
-        commentService.load(id).then(c => {
+        commentService.load(props.commentId).then(c => {
             console.log("loaded", c)
             setComment(c)
         });
@@ -60,7 +60,7 @@ export const CommentNavigatorItem: React.FC<CommentNavigatorItemProps> = (props)
 
     let commentComponent = (comment: DisintComment<any> | undefined) => {
         if (!comment) {
-            return <div>{props.domId}</div>;
+            return <div>{props.containerId}</div>;
         } else {
             if (component == "CommentStandard") {
                 return <CommentStandard comment={comment}></CommentStandard>

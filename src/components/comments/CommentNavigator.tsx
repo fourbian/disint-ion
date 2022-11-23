@@ -77,7 +77,14 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
     }
 
     domId(comment: DisintComment<any>) {
-        return this.props.id + selectionService.separator + comment.id;
+        // HACK: this should probably be encapsulated by selection service somehow, but dnd kit does not update
+        // the active domId while an item has been dragged to a new list.  So, we need to tell the comment when
+        // it is redrawn in that list to use the same domId that dnd kit is using internally, so that dnd kit
+        // knows how to find the currently dragged item in the new container.
+        const overrideDomId = (comment as any)._dragDomId;
+
+        const domId = this.props.id + selectionService.separator + comment.id;
+        return overrideDomId || domId;
     }
 
     /*render() {
@@ -115,7 +122,7 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
                             //let domId = index.toString();
                             //let domId = c.id;
                             //console.log("using id", domId);
-                            return <CommentNavigatorItem overlay={true} domId={domId} key={c.id} comment={c} component={this.props.component}></CommentNavigatorItem>
+                            return <CommentNavigatorItem overlay={true} domId={domId} containerId={this.props.id} key={domId} comment={c} component={this.props.component}></CommentNavigatorItem>
                         })}
                     </Droppable>
                 </SortableContext>

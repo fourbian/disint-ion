@@ -210,7 +210,19 @@ const HomeLayout: React.FC = () => {
 
         {/* Comment navigators that only exist on the main page could be duplicated because when ionic navigates it layers on this component so that there are multiple instances of it.  So, we need to distinguish the id by using the parentId.  This shouldn't be necessary in most other places that use CommentNavigator*/}
         <CommentNavigator id={'main' + parentCommentId} component={commentView} query={query} ref={commentNavigator}></CommentNavigator>
-        <CommentNavigator id={'main2' + parentCommentId} component={commentView} query={query2} ref={commentNavigator}></CommentNavigator>
+        <div>
+          &nbsp;
+        </div>
+        <div>
+          &nbsp;
+        </div>
+        <div>
+          &nbsp;
+        </div>
+        <div>
+          &nbsp;
+        </div>
+        {/*<CommentNavigator id={'main2' + parentCommentId} component={commentView} query={query2} ref={commentNavigator}></CommentNavigator>*/}
 
         <FloatingActionButtons addId={parentCommentId} saveId={parentCommentId}></FloatingActionButtons>
       </div>

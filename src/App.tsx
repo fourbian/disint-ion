@@ -65,19 +65,24 @@ const App: React.FC = () => {
     })
   );
 
-  const [activeId, setActiveId] = useState("");
+  const [activeDomId, setActiveDomId] = useState("");
+  const [activeItemId, setActiveItemId] = useState("");
+  const [activeContainerId, setActiveContainerId] = useState("");
 
   const onDragStart = (event: DragStartEvent): void => {
     selectionService.onDragStart(event);
 
     let active = event.active
-    setActiveId(active.id.toString());
+    setActiveDomId(active.id.toString());
+    setActiveContainerId(active.data?.current?.containerId || "no container id specified by CommentNavigatorItem?");
+    setActiveItemId(active.data?.current?.itemId || "no item id specified by CommentNavigatorItem?")
   }
 
   const onDragEnd = (event: DragEndEvent): void => {
     selectionService.onDragEnd(event);
 
-    setActiveId("");
+    setActiveDomId("");
+    setActiveContainerId("");
   }
 
 
@@ -142,7 +147,7 @@ const App: React.FC = () => {
           </IonSplitPane>
           {createPortal(
             <DragOverlay >
-              <CommentNavigatorItem domId={activeId}></CommentNavigatorItem>
+              <CommentNavigatorItem containerId={activeContainerId} domId={activeDomId} commentId={activeItemId}></CommentNavigatorItem>
             </DragOverlay>,
             document.body
           )}
