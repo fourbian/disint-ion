@@ -163,9 +163,9 @@ export class SelectionService {
                 const overItems = overContainer.items.slice();
                 const activeItems = activeContainer.items.slice();
                     // add active item to over container
-                overItems.splice(newIndex, 0, activeItems[activeIndex])
+                overItems.splice(overItems.length - 1, 0, activeItems[activeIndex])
                 if (overContainer.onNewItems(overItems)) {
-                    (activeItems[activeIndex] as any)._dragDomId = activeDomId;
+                    (activeItems[activeIndex] as any)._dragDomId = activeDomId
                     console.log("new overContainer list", overItems);
                     overContainer.items = overItems; // callee approves update
                 }

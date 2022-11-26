@@ -182,13 +182,13 @@ export function MultipleContainers({
   );
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const lastOverId = useRef<UniqueIdentifier | null>(null);
-  const recentlyMovedToNewContainer = useRef(false);
+  //const recentlyMovedToNewContainer = useRef(false);
   const isSortingContainer = activeId ? containers.includes(activeId) : false;
 
   /**
    * Custom collision detection strategy optimized for multiple containers
    *
-   * - First, find any droppable containers intersecting with the pointer.
+   * - First, find any droppabvle containers intersecting with the pointer.
    * - If there are none, find intersecting containers with the active draggable.
    * - If there are no intersecting containers, return the last matched intersection
    *
@@ -246,9 +246,9 @@ export function MultipleContainers({
       // and the `overId` may become `null`. We manually set the cached `lastOverId`
       // to the id of the draggable item that was moved to the new container, otherwise
       // the previous `overId` will be returned which can cause items to incorrectly shift positions
-      if (recentlyMovedToNewContainer.current) {
-        lastOverId.current = activeId;
-      }
+      //if (recentlyMovedToNewContainer.current) {
+//        lastOverId.current = activeId;
+//      }
 
       // If no droppable is matched, return the last match
       return lastOverId.current ? [{id: lastOverId.current}] : [];
@@ -294,16 +294,9 @@ export function MultipleContainers({
     setClonedItems(null);
   };
 
-  useEffect(() => {
-    requestAnimationFrame(() => {
-      recentlyMovedToNewContainer.current = false;
-    });
-  }, [items]);
-
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={collisionDetectionStrategy}
       measuring={{
         droppable: {
           strategy: MeasuringStrategy.Always,
@@ -351,7 +344,7 @@ export function MultipleContainers({
                 overIndex >= 0 ? overIndex + modifier : overItems.length + 1;
             }
 
-            recentlyMovedToNewContainer.current = true;
+            //recentlyMovedToNewContainer.current = true;
 
             return {
               ...items,

@@ -50,7 +50,7 @@ export const CommentNavigatorItem: React.FC<CommentNavigatorItemProps> = (props)
     }
 
     const style = {
-        transform: CSS.Transform.toString(transform),
+        transform: CSS.Translate.toString(transform),
         transition,
         marginBottom: '10px',
         left: '0px!important'

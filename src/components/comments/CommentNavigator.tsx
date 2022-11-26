@@ -5,6 +5,7 @@ import { CommentQuery } from "../../models/CommentQuery";
 import './CommentNavigator.css'
 import { IonList } from "@ionic/react";
 import {
+    rectSortingStrategy,
     SortableContext,
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
@@ -115,7 +116,7 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
                 </SortableContext>
         */}
 
-                <SortableContext items={this.state.comments.map(c => this.domId(c))} strategy={verticalListSortingStrategy}>
+                <SortableContext items={this.state.comments.map(c => this.domId(c))} strategy={rectSortingStrategy}>
                     <Droppable id={this.props.id}>
                         {this.state.comments?.map((c, index) => {
                             let domId = this.domId(c);
