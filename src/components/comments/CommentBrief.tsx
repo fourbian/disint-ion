@@ -43,8 +43,8 @@ export class CommentBrief extends React.Component<CommentBriefProps, CommentBrie
 
     if (!this.state.comment) return null;
     else return <div >
-      {/*<div>{this.state.comment.id}</div>*/}
-      {<MarkdownEditor readonly={true} markdown={this.state.comment.content} onMarkdownControllerChange={(_) => this.markdownController = _}></MarkdownEditor>}
+      {<div>{this.state.comment.id}</div>}
+      {/*<MarkdownEditor readonly={true} markdown={this.state.comment.content} onMarkdownControllerChange={(_) => this.markdownController = _}></MarkdownEditor>*/}
     </div>
   }
 } 

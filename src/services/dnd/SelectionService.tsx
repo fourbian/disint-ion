@@ -32,6 +32,7 @@ export class SelectionService {
     lastDroppableContainerId: string = "";
     lastDroppableItemId: string = "";
     separator = "_-_";
+    i = 0;
     isDragging: boolean;
     activeContainerId: string;
     activeItemId: string;
@@ -112,73 +113,76 @@ export class SelectionService {
     }
 
     onDragOver(event: DragOverEvent): void {
-        const over = event.over;
-        const active = event.active;
-        const overContainerId = event.over?.data?.current?.containerId;
-        const activeContainerId = event.active?.data?.current?.containerId;
-        const overDomId = event.over?.id?.toString();
-        const activeDomId = event.active?.id?.toString();
-        //const activeData = event.active.data.current
 
-        if (overContainerId == null) {
-            return;
-        }
+        // const over = event.over;
+        // const active = event.active;
+        // const overContainerId = event.over?.data?.current?.containerId;
+        // const activeContainerId = event.active?.data?.current?.containerId;
+        // const overDomId = event.over?.id?.toString();
+        // const activeDomId = event.active?.id?.toString();
+        // //const activeData = event.active.data.current
 
-        console.log("onDragOver", activeContainerId, activeDomId, overContainerId, overDomId);
+        // if (overContainerId == null) {
+        //     return;
+        // }
 
-        const overContainer = this.containers.get(overContainerId);
-        const activeContainer = this.containers.get(activeContainerId);
+        // //console.log("onDragOver", activeContainerId, activeDomId, overContainerId, overDomId, event.delta, event.collisions, event.activatorEvent);
+        // const collisions = event.collisions?.map(c => [c.id, c.data?.value]) || [];
+        // //console.log(collisions[0], collisions[1]);
+        // console.log(over);
 
-        if (!overContainer || !activeContainer) {
-            return;
-        }
+        // const overContainer = this.containers.get(overContainerId);
+        // const activeContainer = this.containers.get(activeContainerId);
 
-        console.log("detected")
-        if (activeContainerId !== overContainerId) {
-            const overDomIds = event.over?.data?.current?.sortable?.items || [];
-            const activeDomIds = event.active?.data?.current?.sortable?.items || [];
-            const overIndex = overDomIds.indexOf(overDomId);
-            const activeIndex = activeDomIds.indexOf(activeDomId);
+        // if (!overContainer || !activeContainer) {
+        //     return;
+        // }
 
-            let newIndex: number;
+        // if (activeContainerId !== overContainerId) {
+        //     const overDomIds = event.over?.data?.current?.sortable?.items || [];
+        //     const activeDomIds = event.active?.data?.current?.sortable?.items || [];
+        //     const overIndex = overDomIds.indexOf(overDomId);
+        //     const activeIndex = activeDomIds.indexOf(activeDomId);
 
-            const isBelowOverItem =
-                over &&
-                active.rect.current.translated &&
-                active.rect.current.translated.top >
-                over.rect.top + over.rect.height;
+        //     let newIndex: number;
 
-            const modifier = isBelowOverItem ? 1 : 0;
+        //     const isBelowOverItem =
+        //         over &&
+        //         active.rect.current.translated &&
+        //         active.rect.current.translated.top >
+        //         over.rect.top + over.rect.height;
 
-            newIndex =
-                overIndex >= 0 ? overIndex + modifier : overDomIds.length + 1;
+        //     const modifier = isBelowOverItem ? 1 : 0;
 
-            //recentlyMovedToNewContainer.current = true;
+        //     newIndex =
+        //         overIndex >= 0 ? overIndex + modifier : overDomIds.length + 1;
 
-            console.log("active item id", this.activeItemId, "active dom id", this.activeDomId);
-            console.log("moving from", activeContainer.id, activeIndex, " to ", overContainer.id, overIndex);
-            console.log("moving from", activeContainer.id, activeDomId, " to ", overContainer.id, overDomId);
+        //     //recentlyMovedToNewContainer.current = true;
 
-            if (activeIndex > -1) {
-                const overItems = overContainer.items.slice();
-                const activeItems = activeContainer.items.slice();
-                    // add active item to over container
-                overItems.splice(overItems.length - 1, 0, activeItems[activeIndex])
-                if (overContainer.onNewItems(overItems)) {
-                    (activeItems[activeIndex] as any)._dragDomId = activeDomId
-                    console.log("new overContainer list", overItems);
-                    overContainer.items = overItems; // callee approves update
-                }
+        //     console.log("active item id", this.activeItemId, "active dom id", this.activeDomId);
+        //     console.log("moving from", activeContainer.id, activeIndex, " to ", overContainer.id, overIndex);
+        //     console.log("moving from", activeContainer.id, activeDomId, " to ", overContainer.id, overDomId);
 
-                // remove active item from active container
-                activeItems.splice(activeIndex, 1);
-                if (activeContainer.onNewItems(activeItems)) {
-                    console.log("new activeContainer list", overItems);
-                    activeContainer.items = activeItems; // callee approves update
-                }
+        //     if (activeIndex > -1) {
+        //         const overItems = overContainer.items.slice();
+        //         const activeItems = activeContainer.items.slice();
+        //             // add active item to over container
+        //         overItems.splice(overItems.length - 1, 0, activeItems[activeIndex])
+        //         if (overContainer.onNewItems(overItems)) {
+        //             (activeItems[activeIndex] as any)._dragDomId = activeDomId
+        //             console.log("new overContainer list", overItems);
+        //             overContainer.items = overItems; // callee approves update
+        //         }
 
-            }
-        }
+        //         // remove active item from active container
+        //         activeItems.splice(activeIndex, 1);
+        //         if (activeContainer.onNewItems(activeItems)) {
+        //             console.log("new activeContainer list", overItems);
+        //             activeContainer.items = activeItems; // callee approves update
+        //         }
+
+        //     }
+        // }
 
     }
 
@@ -432,76 +436,33 @@ export class SelectionService {
     }
 
 
+    collisionDetectionStrategy: CollisionDetection = (args) => {
 
-    //   Custom collision detection strategy optimized for multiple containers
+        let ids = closestCenter({
+            ...args
+        });
 
-    //   - First, find any droppable containers intersecting with the pointer.
-    //   - If there are none, find intersecting containers with the active draggable.
-    //   - If there are no intersecting containers, return the last matched intersection
-
-
-    // TODO: memoize bsed on activeId and items
-    /*collisionDetectionStrategy: CollisionDetection = (args) => {
-        if (this.activeId && this.activeId in this.items) {
-            return closestCenter({
-                ...args,
-                droppableContainers: args.droppableContainers.filter(
-                    (container: DroppableContainer) => container.id in this.items
-                ),
-            });
-        }
-
-        // Start by finding any intersecting droppable
-        const pointerIntersections = pointerWithin(args);
-        const intersections =
-            pointerIntersections.length > 0
-                ? // If there are droppables intersecting with the pointer, return those
-                pointerIntersections
-                : rectIntersection(args);
-        let overId = getFirstCollision(intersections, 'id');
-
-        if (overId != null) {
-            if (overId === this.TRASH_ID) {
-                // If the intersecting droppable is the trash, return early
-                // Remove this if you're not using trashable functionality in your app
-                return intersections;
+        const overId = ids[0]?.id;
+        if (overId) {
+            if (this.lastOverId) {
+                const el = document.querySelector(`#${this.lastOverId}`);
+                el?.classList.remove("dnd-over-item");
             }
-
-            if (overId in this.items) {
-                const containerItems = this.items[overId];
-
-                // If a container is matched and it contains items (columns 'A', 'B', 'C')
-                if (containerItems.length > 0) {
-                    // Return the closest droppable within that container
-                    overId = closestCenter({
-                        ...args,
-                        droppableContainers: args.droppableContainers.filter(
-                            (container) =>
-                                container.id !== overId &&
-                                containerItems.includes(container.id)
-                        ),
-                    })[0]?.id;
-                }
-            }
-
-            this.lastOverId = overId;
-
-            return [{ id: overId }];
+            const el = document.querySelector(`#${overId}`);
+            el?.classList.add("dnd-over-item")
+            this.lastOverId = overId.toString();
         }
 
-        // When a draggable item moves to a new container, the layout may shift
-        // and the `overId` may become `null`. We manually set the cached `lastOverId`
-        // to the id of the draggable item that was moved to the new container, otherwise
-        // the previous `overId` will be returned which can cause items to incorrectly shift positions
-        if (this.recentlyMovedToNewContainer) {
-            this.lastOverId = this.activeId;
-        }
+        //console.log(overId[0]);
 
-        // If no droppable is matched, return the last match
-        return this.lastOverId ? [{ id: this.lastOverId }] : [];
+        // this.i+=1;
+        // console.log(args);
+        // console.log(this.i);
+        return ids;
+
     }
 
-
+    /*
     register(id: string, items: Items, containers: string[], callback: ContextCallback) {
 
         this.contexts.set(id, {

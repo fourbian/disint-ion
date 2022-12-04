@@ -126,6 +126,8 @@ const App: React.FC = () => {
         onDragEnd={onDragEnd}
         onDragCancel={selectionService.onDragCancel.bind(selectionService)}
         modifiers={selectionService.modifiers}
+        collisionDetection={selectionService.collisionDetectionStrategy}
+        
       >
 
         <IonReactRouter>

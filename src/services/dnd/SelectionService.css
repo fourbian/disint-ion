@@ -15,6 +15,14 @@ and the position is fixed which positions it over the inner clone border*/
 .dnd-drop-target-container {
     /*background-color: #00800011;*/
 }
+
+.dnd-over-item {
+    background-color: red;
+}
+
+.padding {
+    padding: 5px;
+}
 .dnd-drop-target-item::after {
     position: absolute;
     content: '';

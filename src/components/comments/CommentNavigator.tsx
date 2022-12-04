@@ -16,6 +16,13 @@ import { DraggableItem, selectionService } from "../../services/dnd/SelectionSer
 import { Droppable } from "../../services/dnd/Droppable";
 import { createPortal } from "react-dom";
 
+const customRedraw = () => null;
+
+interface CommentOrDroppable {
+    comment?: DisintComment<any>;
+    domId: string;
+}
+
 class CommentNavigatorProps {
     query: CommentQuery;
     ref: any;
@@ -48,7 +55,7 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
     }
 
     onDragUpdate(comments: DraggableItem[]): boolean {
-        this.setState({comments: comments as any});
+        this.setState({ comments: comments as any });
         return true;
     }
 
@@ -88,12 +95,42 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
         return overrideDomId || domId;
     }
 
+    domIdsForComments() {
+        return
+    }
+
+    commentsAndDroppables(): CommentOrDroppable[] {
+        const comments = this.state?.comments || [];
+        const sep = "____"; // TODO: make this avail via selection service
+        if (!comments.length) {
+            return [];
+        }
+
+        const commentsAndDroppables: CommentOrDroppable[] = [
+            //{ domId: sep + this.domId(comments[0]) }
+        ];
+
+        let lastDomId = "";
+
+        for (const comment of comments) {
+            const domId = this.domId(comment);
+
+            commentsAndDroppables.push({ domId: lastDomId + sep + domId });
+            commentsAndDroppables.push({ domId: domId, comment: comment })
+
+            lastDomId = domId;
+        }
+
+        return commentsAndDroppables;
+    }
+
     /*render() {
         return <MultipleContainers vertical={true} id={this.props.id}></MultipleContainers>
     }*/
 
     render() {
         this.reloadCommentsIfQueryChanged();
+        const commentsAndDroppables = this.commentsAndDroppables();
 
         return (
             <div>
@@ -115,17 +152,18 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
                     </Droppable>
                 </SortableContext>
         */}
+                <SortableContext items={commentsAndDroppables.map(c => c.domId)} strategy={customRedraw}>
+                    {commentsAndDroppables.map((c, index) => {
+                        if (c.comment) {
+                            return <CommentNavigatorItem key={c.domId} overlay={true} domId={c.domId} containerId={this.props.id} comment={c.comment} component={this.props.component}></CommentNavigatorItem>
+                        } else {
+                            return <Droppable key={c.domId} id={c.domId}>
+                                <div id={c.domId} style={{ width: '100%', height: '5px' }}>
 
-                <SortableContext items={this.state.comments.map(c => this.domId(c))} strategy={rectSortingStrategy}>
-                    <Droppable id={this.props.id}>
-                        {this.state.comments?.map((c, index) => {
-                            let domId = this.domId(c);
-                            //let domId = index.toString();
-                            //let domId = c.id;
-                            //console.log("using id", domId);
-                            return <CommentNavigatorItem overlay={true} domId={domId} containerId={this.props.id} key={domId} comment={c} component={this.props.component}></CommentNavigatorItem>
-                        })}
-                    </Droppable>
+                                </div>
+                            </Droppable>
+                        }
+                    })}
                 </SortableContext>
 
             </div>

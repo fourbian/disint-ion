@@ -78,18 +78,20 @@ export const CommentNavigatorItem: React.FC<CommentNavigatorItemProps> = (props)
         /*<div ref={setNodeRef} style={style} {...attributes} {...listeners}>
             {props.id}    
         </div>*/
-        <IonItem ref={setNodeRef} style={style} {...attributes} {...listeners} button>
-            <LazyAvatar userId={comment?.userId || ""}>
+        <div className="padding" id={props.domId}>
+            <IonItem ref={setNodeRef} style={style} {...attributes} {...listeners} button>
+                <LazyAvatar userId={comment?.userId || ""}>
 
-            </LazyAvatar>
-            <Link className="nostyle" to={"/comments/" + props.comment?.id} style={{ display: 'flex', flex: 'auto' }}>
-                {commentComponent(props.comment || comment)}
-                <div style={{ marginBottom: '10px' }}></div>
-            </Link>
-            <span style={{ marginBottom: 'auto' }}>
-                <PopoverButton>
-                </PopoverButton>
-            </span>
-        </IonItem>
+                </LazyAvatar>
+                <Link className="nostyle" to={"/comments/" + props.comment?.id} style={{ display: 'flex', flex: 'auto' }}>
+                    {commentComponent(props.comment || comment)}
+                    <div style={{ marginBottom: '10px' }}></div>
+                </Link>
+                <span style={{ marginBottom: 'auto' }}>
+                    <PopoverButton>
+                    </PopoverButton>
+                </span>
+            </IonItem>
+        </div>
     )
 }
