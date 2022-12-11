@@ -15,12 +15,14 @@ import { DragOverlay } from "@dnd-kit/core";
 import { DraggableItem, selectionService } from "../../services/dnd/SelectionService";
 import { Droppable } from "../../services/dnd/Droppable";
 import { createPortal } from "react-dom";
+import { IonButton, useIonAlert } from '@ionic/react';
 
 const customRedraw = () => null;
 
 interface CommentOrDroppable {
     comment?: DisintComment<any>;
     domId: string;
+    index: number;
 }
 
 class CommentNavigatorProps {
@@ -54,8 +56,27 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
 
     }
 
-    onDragUpdate(comments: DraggableItem[]): boolean {
-        this.setState({ comments: comments as any });
+    onDrop(comment?: DraggableItem, index?: number, isCopyOperation?: boolean): boolean {
+        // TODO: next up:
+        // * implement support for turning on/off order ability (i.e. dragging inbetween items vs just dropping onto a container only)
+        // * multiple dnd
+        // * ordering (see loadComments below)
+        // * other TODO:s in this file
+        console.log("onDrop", this.props.id, index, comment);
+
+        //this.setState({ comments: comments as any });
+        return true;
+    }
+
+    onRemove(comment?: DraggableItem): boolean {
+        console.log("onRemove", this.props.id, comment);
+        return true;
+    }
+
+    doesUserOwn(comment?: DraggableItem): boolean {
+        console.log("doesUserOwn", this.props.id, comment);
+        // TODO: if no parentId then return false
+        // if user owns either containerItem (this.props.query.parentId) or draggable item
         return true;
     }
 
@@ -68,7 +89,14 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
 
         this.setState({ comments });
 
-        selectionService.registerContainer(this.props.id, comments, this.onDragUpdate.bind(this));
+        selectionService.registerContainer({
+            domId: this.props.id,
+            items: comments,
+            doesAllowOrdering: true, // TODO: don't hardcode this
+            onDrop: this.onDrop.bind(this),
+            onRemove: this.onRemove.bind(this),
+            doesUserOwn: this.doesUserOwn.bind(this)
+        });
 
         this._loading = false;
     }
@@ -85,14 +113,8 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
     }
 
     domId(comment: DisintComment<any>) {
-        // HACK: this should probably be encapsulated by selection service somehow, but dnd kit does not update
-        // the active domId while an item has been dragged to a new list.  So, we need to tell the comment when
-        // it is redrawn in that list to use the same domId that dnd kit is using internally, so that dnd kit
-        // knows how to find the currently dragged item in the new container.
-        const overrideDomId = (comment as any)._dragDomId;
-
         const domId = this.props.id + selectionService.separator + comment.id;
-        return overrideDomId || domId;
+        return domId;
     }
 
     domIdsForComments() {
@@ -102,24 +124,24 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
     commentsAndDroppables(): CommentOrDroppable[] {
         const comments = this.state?.comments || [];
         const sep = "____"; // TODO: make this avail via selection service
-        if (!comments.length) {
-            return [];
-        }
 
-        const commentsAndDroppables: CommentOrDroppable[] = [
-            //{ domId: sep + this.domId(comments[0]) }
-        ];
+        const commentsAndDroppables: CommentOrDroppable[] = [];
 
         let lastDomId = "";
+        let index = 0;
 
         for (const comment of comments) {
             const domId = this.domId(comment);
 
-            commentsAndDroppables.push({ domId: lastDomId + sep + domId });
-            commentsAndDroppables.push({ domId: domId, comment: comment })
+            commentsAndDroppables.push({ domId: lastDomId + sep + domId, index: index });
+            commentsAndDroppables.push({ domId: domId, comment: comment, index: index })
 
             lastDomId = domId;
+            index = index + 1;
         }
+
+        const newDomId = this.domId({ id: "new" } as DisintComment<any>);
+        commentsAndDroppables.push({ domId: lastDomId + sep + newDomId, index: index });
 
         return commentsAndDroppables;
     }
@@ -157,8 +179,8 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
                         if (c.comment) {
                             return <CommentNavigatorItem key={c.domId} overlay={true} domId={c.domId} containerId={this.props.id} comment={c.comment} component={this.props.component}></CommentNavigatorItem>
                         } else {
-                            return <Droppable key={c.domId} id={c.domId}>
-                                <div id={c.domId} style={{ width: '100%', height: '5px' }}>
+                            return <Droppable key={c.domId} id={c.domId} containerId={this.props.id} index={c.index}>
+                                <div id={c.domId} style={{ width: '100%', height: '1px' }} >
 
                                 </div>
                             </Droppable>

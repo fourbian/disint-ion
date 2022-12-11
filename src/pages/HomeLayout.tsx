@@ -20,7 +20,7 @@ import { PopoverButton } from '../components/shared/PopoverButton';
 import { menuController, popoverController } from '@ionic/core';
 import { CommentBrief } from '../components/comments/CommentBrief';
 import { CommentEditor } from '../components/comments/CommentEditor';
-import { arrowForwardCircle, saveOutline, sendOutline } from 'ionicons/icons';
+import { arrowForwardCircle, closeOutline, saveOutline, sendOutline } from 'ionicons/icons';
 import { FloatingActionButtons } from '../components/shared/FloatingActionButtons';
 import { serviceBus } from '../services/bus/ServiceBus';
 import { BeginNewCommentEvent } from '../services/bus/BeginNewCommentEvent';
@@ -29,8 +29,43 @@ import { RequestAddCommentEvent } from '../services/bus/RequestAddCommentEvent';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableItem } from '../components/test/SortableItem';
 import { selectionService } from '../services/dnd/SelectionService';
-import { MultipleContainers } from '../components/test/SortableTest copy';
 import { Droppable } from '../services/dnd/Droppable';
+import { BeginDndEvent } from '../services/bus/BeginDndEvent';
+
+export class CancelDndComponent extends React.Component<{}, { show: boolean }> {
+  serviceBusSubscription: Subscription;
+
+  async componentDidMount() {
+    this.serviceBusSubscription = serviceBus.subscribe(this.onServiceBusEvent.bind(this));
+  }
+
+  componentWillUnmount() {
+    if (this.serviceBusSubscription) this.serviceBusSubscription.unsubscribe();
+  }
+
+  onServiceBusEvent(serviceBusEvent: IServiceBusEvent) {
+    if (serviceBusEvent instanceof BeginDndEvent) {
+      let e = serviceBusEvent as BeginDndEvent;
+      this.setState({ show: e.active });
+    }
+  }
+
+  render() {
+    return (
+      <>
+        {this.state?.show &&
+          <Droppable id={'trash'} isTrash={true}>
+            <IonButton color='danger'>
+              <IonIcon slot="start" icon={closeOutline}></IonIcon>
+              Drop here to cancel
+            </IonButton>
+          </Droppable>
+        }
+
+      </>
+    );
+  }
+};
 
 const HomeLayout: React.FC = () => {
   const [items, setItems] = useState([1, 2, 3]);
@@ -144,6 +179,7 @@ const HomeLayout: React.FC = () => {
           <IonButtons slot="start">
             <IonMenuButton menu="start" />
           </IonButtons>
+          <CancelDndComponent></CancelDndComponent>
           <IonButtons slot="end">
             <IonMenuButton menu="end" />
           </IonButtons>
@@ -212,19 +248,6 @@ const HomeLayout: React.FC = () => {
 
         {/* Comment navigators that only exist on the main page could be duplicated because when ionic navigates it layers on this component so that there are multiple instances of it.  So, we need to distinguish the id by using the parentId.  This shouldn't be necessary in most other places that use CommentNavigator*/}
         <CommentNavigator id={'main' + parentCommentId} component={commentView} query={query} ref={commentNavigator}></CommentNavigator>
-        <div>
-          &nbsp;
-        </div>
-        <div>
-          &nbsp;
-        </div>
-        <div>
-          &nbsp;
-        </div>
-        <div>
-          &nbsp;
-        </div>
-        {/*<CommentNavigator id={'main2' + parentCommentId} component={commentView} query={query2} ref={commentNavigator}></CommentNavigator>*/}
 
         <FloatingActionButtons addId={parentCommentId} saveId={parentCommentId}></FloatingActionButtons>
       </div>

@@ -17,11 +17,19 @@ and the position is fixed which positions it over the inner clone border*/
 }
 
 .dnd-over-item {
-    background-color: red;
+    background-color: blue;
 }
 
-.padding {
-    padding: 5px;
+.dnd-overlay {
+    opacity: 0.7;
+}
+
+.dnd-hidden {
+    display: none;
+}
+
+.dnd-droppable {
+    padding: 1px;
 }
 .dnd-drop-target-item::after {
     position: absolute;

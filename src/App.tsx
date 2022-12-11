@@ -53,15 +53,17 @@ setupIonicReact();
 // TODO: if you need custom measuring: https://github.com/clauderic/dnd-kit/issues/830
 const App: React.FC = () => {
   const sensors = useSensors(
-    useSensor(MouseSensor),
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5
+      },
+    }),
     useSensor(TouchSensor, {
       activationConstraint: {
         delay: 250,
         tolerance: 5,
       },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter,
     })
   );
 
@@ -148,8 +150,8 @@ const App: React.FC = () => {
             </IonRouterOutlet>
           </IonSplitPane>
           {createPortal(
-            <DragOverlay >
-              <CommentNavigatorItem containerId={activeContainerId} domId={activeDomId} commentId={activeItemId}></CommentNavigatorItem>
+            <DragOverlay className='dnd-overlay'>
+              <CommentNavigatorItem  containerId={activeContainerId} domId={activeDomId} commentId={activeItemId}></CommentNavigatorItem>
             </DragOverlay>,
             document.body
           )}

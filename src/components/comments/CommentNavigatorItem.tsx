@@ -52,7 +52,6 @@ export const CommentNavigatorItem: React.FC<CommentNavigatorItemProps> = (props)
     const style = {
         transform: CSS.Translate.toString(transform),
         transition,
-        marginBottom: '10px',
         left: '0px!important'
     };
 
@@ -78,7 +77,7 @@ export const CommentNavigatorItem: React.FC<CommentNavigatorItemProps> = (props)
         /*<div ref={setNodeRef} style={style} {...attributes} {...listeners}>
             {props.id}    
         </div>*/
-        <div className="padding" id={props.domId}>
+        <div className="dnd-droppable" id={props.domId}>
             <IonItem ref={setNodeRef} style={style} {...attributes} {...listeners} button>
                 <LazyAvatar userId={comment?.userId || ""}>
 
