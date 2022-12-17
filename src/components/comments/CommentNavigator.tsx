@@ -65,7 +65,6 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
         // * plugging in user permissions based on who owns comment
         // * ordering (see loadComments below)
         // * other TODO:s in this file
-        // * don't show LINK button in alert if moving item to the same container
         console.log("onDrop", this.props.id, index, sourceComment, targetComment);
 
         //this.setState({ comments: comments as any });
@@ -90,7 +89,7 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
 
         this._lastUsedQuery = this.props.query;
         const comments = await commentQueryService.query(this.props.query);
-        //const parentComment = this.props.query.parentId ?  await commentService.load(this.props.query.parentId) : null;
+        const parentComment = this.props.query.parentId ?  await commentService.load(this.props.query.parentId) : null;
 
         this.setState({ comments });
 
@@ -98,7 +97,7 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
             domId: this.props.id,
             items: comments,
             containerItemId: this.props.query.parentId,
-            //containerItem: parentComment as DisintComment<any>,
+            containerItem: parentComment as DisintComment<any>,
             doesAllowOrdering: this.doesAllowReordering, // TODO: don't hardcode this
             onDrop: this.onDrop.bind(this),
             onRemove: this.onRemove.bind(this),

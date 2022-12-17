@@ -27,7 +27,7 @@ export class ContainerContext {
     domId: string;
     items: DraggableItem[] = [];
     containerItemId: string;
-    //containerItem: DraggableItem;
+    containerItem: DraggableItem;
     doesAllowOrdering: boolean;
     onDrop: (sourceItem: DraggableItem, targetItem: DraggableItem, index?: number, isCopyOperation?: boolean) => boolean;
     onRemove: (item: DraggableItem) => boolean;
@@ -200,7 +200,7 @@ export class SelectionService {
             const hasIndex = index == 0 || index;
             const targetContainer = this.containers.get(targetContainerId);
             const sourceContainer = this.containers.get(this.activeContainerId);
-            const targetItem: DraggableItem | null | undefined = itemId ? targetContainer?.items.filter(i => i.id == itemId)[0] : null;
+            const targetItem: DraggableItem | null | undefined = itemId ? targetContainer?.items.filter(i => i.id == itemId)[0] : targetContainer?.containerItem;
             const sourceItem = sourceContainer?.items.filter(i => i.id == this.activeItemId)[0];
             const doesUserOwnSourceItem = sourceContainer?.doesUserOwn(sourceItem as DraggableItem);
             const doesUserOwnTargetItem = targetContainer?.doesUserOwn(targetItem as DraggableItem);
