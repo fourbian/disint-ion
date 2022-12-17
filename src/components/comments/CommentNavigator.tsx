@@ -62,6 +62,7 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
         // * multiple dnd
         // * ordering (see loadComments below)
         // * other TODO:s in this file
+        // * don't show LINK button in alert if moving item to the same container
         console.log("onDrop", this.props.id, index, comment);
 
         //this.setState({ comments: comments as any });
@@ -92,6 +93,7 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
         selectionService.registerContainer({
             domId: this.props.id,
             items: comments,
+            containerItemId: this.props.query.parentId,
             doesAllowOrdering: true, // TODO: don't hardcode this
             onDrop: this.onDrop.bind(this),
             onRemove: this.onRemove.bind(this),

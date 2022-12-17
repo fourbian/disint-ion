@@ -26,6 +26,7 @@ export interface DraggableItem {
 export class ContainerContext {
     domId: string;
     items: DraggableItem[] = [];
+    containerItemId: string;
     doesAllowOrdering: boolean;
     onDrop: (item: DraggableItem, index?: number, isCopyOperation?: boolean) => boolean;
     onRemove: (item: DraggableItem) => boolean;
@@ -181,28 +182,36 @@ export class SelectionService {
         }
 
         if (this.lastOverId != 'trash') {
-            const containerId = data.containerId;
+            const targetContainerId = data.containerId;
+            const sourceContainerId = this.activeContainerId;
             const itemId = data.itemId;
             const index = data.index;
-            const targetContainer = this.containers.get(containerId);
+            const hasIndex = index == 0 || index;
+            const targetContainer = this.containers.get(targetContainerId);
             const sourceContainer = this.containers.get(this.activeContainerId);
             const targetItem: DraggableItem | null | undefined = itemId ? targetContainer?.items.filter(i => i.id == itemId)[0] : null;
             const sourceItem = sourceContainer?.items.filter(i => i.id == this.activeItemId)[0];
             const doesUserOwnSourceItem = sourceContainer?.doesUserOwn(sourceItem as DraggableItem);
             const doesUserOwnTargetItem = targetContainer?.doesUserOwn(targetItem as DraggableItem);
+            const sourceContainerItemId = sourceContainer?.containerItemId;
+            const targetContainerItemId = targetContainer?.containerItemId;
+            const isTopLevelToTopLevelAction = !sourceContainerItemId && !targetContainerItemId && hasIndex;
 
-            const sameSourceAndTarget = targetItem?.id && sourceItem?.id && targetItem?.id == sourceItem?.id;
-            const sameContainer = targetContainer?.domId == sourceContainer?.domId;
-            const dragOntoNewParent = !sameSourceAndTarget;
-            const dragToNewContainer = !sameContainer;
-            const reorder = sameContainer && (index == 0 || index);
-            const canProceed = dragOntoNewParent || dragToNewContainer || reorder;
+            const sameContainer = targetContainerId == sourceContainerId;
+            //const sameContainerItem = sourceContainerItemId == targetContainerItemId;
+            const sameSourceAndTarget = 
+                (!hasIndex && sourceItem?.id && sourceItem?.id == targetContainerItemId)
+                ||
+                (targetItem?.id && sourceItem?.id && sourceItem?.id == targetItem?.id);
+            const isReorder = !!hasIndex;
+            const newTarget = !sameSourceAndTarget;
+            const canProceed = newTarget || isReorder;
 
             if (canProceed) {
                 const buttons = [];
 
                 // MOVE: user must be able to remove the link from the source item and add a link to the target item
-                if (doesUserOwnSourceItem && doesUserOwnTargetItem) {
+                if (doesUserOwnSourceItem && doesUserOwnTargetItem && !isTopLevelToTopLevelAction) {
                     buttons.push({
                         text: 'Move',
                         role: 'move',
@@ -223,7 +232,7 @@ export class SelectionService {
                 });
 
                 // LINK: user must own source or dest
-                if (doesUserOwnSourceItem || doesUserOwnTargetItem) {
+                if ((doesUserOwnSourceItem || doesUserOwnTargetItem) && !sameSourceAndTarget && !isTopLevelToTopLevelAction) {
                     buttons.push({
                         text: 'Link',
                         role: 'link',
@@ -233,13 +242,16 @@ export class SelectionService {
                     });
                 }
 
-                // ORDER: Must own source or dest to order.  How to do top level ordering?  non-top level ordering?
-                const alert = await alertController.create({
-                    header: 'Link, copy, or move?',
-                    buttons
-                });
+                const isSameContainerReorder = sameContainer && isReorder;
+                if (!isSameContainerReorder) {
+                    // ORDER: Must own source or dest to order.  How to do top level ordering?  non-top level ordering?
+                    const alert = await alertController.create({
+                        header: 'Select an action',
+                        buttons
+                    });
 
-                alert.present();
+                    alert.present();
+                }
 
             } else {
                 console.warn("Ignoring dnd because items are dropped onto itself or within the same container where ordering is not specified")

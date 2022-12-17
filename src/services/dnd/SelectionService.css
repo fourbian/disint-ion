@@ -58,3 +58,6 @@ and the position is fixed which positions it over the inner clone border*/
     */
 }
 
+.alert-button-group {
+    flex-direction: row !important;
+}
