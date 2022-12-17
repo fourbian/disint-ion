@@ -27,8 +27,9 @@ export class ContainerContext {
     domId: string;
     items: DraggableItem[] = [];
     containerItemId: string;
+    //containerItem: DraggableItem;
     doesAllowOrdering: boolean;
-    onDrop: (item: DraggableItem, index?: number, isCopyOperation?: boolean) => boolean;
+    onDrop: (sourceItem: DraggableItem, targetItem: DraggableItem, index?: number, isCopyOperation?: boolean) => boolean;
     onRemove: (item: DraggableItem) => boolean;
     doesUserOwn: (item: DraggableItem) => boolean;
 }
@@ -49,6 +50,8 @@ export class SelectionService {
     recentlyMovedToNewContainer = false;
     modifiers?: Modifiers;
     containers = new Map<string, ContainerContext>();
+    dndOverItemClass = "dnd-over-item";
+    dndOverContainerClass = "dnd-over-container";
 
     constructor() {
         window.addEventListener('mousemove', this.dragMoved.bind(this));
@@ -122,21 +125,29 @@ export class SelectionService {
             ...args
         });
 
-        const overId = ids[0]?.id;
+        const over = ids[0]?.data?.droppableContainer?.data?.current;
+        const hasIndex = over.index == 0 || !!over.index;
+        const overContainerId = over.containerId;
+        const overContainer = this.containers.get(overContainerId);
+        const useOver = overContainer?.doesAllowOrdering || !hasIndex;
+        const overId = useOver ? ids[0]?.id : overContainerId;
+        const className = useOver ? this.dndOverItemClass : this.dndOverContainerClass;
+        //console.log(overId, className);
         if (overId) {
             if (this.lastOverId) {
                 const el = document.querySelector(`#${this.lastOverId}`);
-                el?.classList.remove("dnd-over-item");
+                el?.classList.remove(this.dndOverItemClass);
+                el?.classList.remove(this.dndOverContainerClass);
             }
             const el = document.querySelector(`#${overId}`);
-            el?.classList.add("dnd-over-item")
+            el?.classList.add(className);
             this.lastOverId = overId.toString();
         }
 
         //console.log(overId[0]);
 
         // this.i+=1;
-        // console.log(args);
+        //console.log(ids);
         // console.log(this.i);
         return ids;
 
@@ -199,13 +210,13 @@ export class SelectionService {
 
             const sameContainer = targetContainerId == sourceContainerId;
             //const sameContainerItem = sourceContainerItemId == targetContainerItemId;
-            const sameSourceAndTarget = 
+            const sameSourceAndTarget =
                 (!hasIndex && sourceItem?.id && sourceItem?.id == targetContainerItemId)
                 ||
                 (targetItem?.id && sourceItem?.id && sourceItem?.id == targetItem?.id);
             const isReorder = !!hasIndex;
-            const newTarget = !sameSourceAndTarget;
-            const canProceed = newTarget || isReorder;
+            const isNewTarget = !sameSourceAndTarget;
+            const canProceed = isNewTarget || isReorder;
 
             if (canProceed) {
                 const buttons = [];
@@ -216,7 +227,7 @@ export class SelectionService {
                         text: 'Move',
                         role: 'move',
                         handler: () => {
-                            targetContainer?.onDrop(targetItem as DraggableItem, index, /*isCopy=*/false);
+                            targetContainer?.onDrop(sourceItem as DraggableItem, targetItem as DraggableItem, index, /*isCopy=*/false);
                             sourceContainer?.onRemove(sourceItem as DraggableItem);
                         },
                     });
@@ -227,7 +238,7 @@ export class SelectionService {
                     text: 'Copy',
                     role: 'copy',
                     handler: () => {
-                        targetContainer?.onDrop(targetItem as DraggableItem, index, /*isCopy=*/true);
+                        targetContainer?.onDrop(sourceItem as DraggableItem, targetItem as DraggableItem, index, /*isCopy=*/true);
                     },
                 });
 
@@ -237,13 +248,15 @@ export class SelectionService {
                         text: 'Link',
                         role: 'link',
                         handler: () => {
-                            targetContainer?.onDrop(targetItem as DraggableItem, index, /*isCopy=*/false);
+                            targetContainer?.onDrop(sourceItem as DraggableItem, targetItem as DraggableItem, index, /*isCopy=*/false);
                         },
                     });
                 }
 
                 const isSameContainerReorder = sameContainer && isReorder;
-                if (!isSameContainerReorder) {
+                if (isSameContainerReorder) {
+                    targetContainer?.onDrop(sourceItem as DraggableItem, targetItem as DraggableItem, index, /*isCopy=*/false);
+                } else {
                     // ORDER: Must own source or dest to order.  How to do top level ordering?  non-top level ordering?
                     const alert = await alertController.create({
                         header: 'Select an action',
@@ -267,7 +280,8 @@ export class SelectionService {
         if (this.lastOverId) {
             // clear active dnd styling
             const el = document.querySelector(`#${this.lastOverId}`);
-            el?.classList.remove("dnd-over-item");
+            el?.classList.remove(this.dndOverContainerClass);
+            el?.classList.remove(this.dndOverItemClass);
         }
 
         if (this.lastOverId != 'trash') {
