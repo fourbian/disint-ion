@@ -1,0 +1,5 @@
+.ion-page {
+    /* When using IonContent, this isn't necessary.  Removing IonContent adds "justify-content: space-between"
+    which pushes the content down to the bottom */
+    justify-content: initial!important;
+}

@@ -1,17 +1,3 @@
-import {
-  IonContent,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonListHeader,
-  IonMenu,
-  IonMenuToggle,
-  IonNote,
-  IonAccordionGroup,
-  IonAccordion,
-  IonAvatar
-} from '@ionic/react';
 
 import React from "react";
 import './LazyAvatar.css';
@@ -20,6 +6,7 @@ import { MarkdownController } from "../markdown/MarkdownController";
 import { MarkdownEditor } from "../markdown/MarkdownEditor";
 import { userService } from '../../services/users/UserService';
 import { UserProfile } from '../../models/UserProfile'
+import { Avatar } from "@chakra-ui/react";
 
 class LazyAvatarProps {
   public userId: string;
@@ -43,9 +30,8 @@ export class LazyAvatar extends React.Component<LazyAvatarProps, LazyAvatarState
   render() {
     this.loadUser();
     return this.state?.user && <>
-      <IonAvatar slot="start" style={{ marginBottom: 'auto', marginTop: '2px', flexShrink: '0' }}>
-        <img src={this.state?.user?.avatar} />
-      </IonAvatar>
+      <Avatar src={this.state?.user?.avatar}>
+      </Avatar>
     </> || <span>avatar</span>;
   }
 } 

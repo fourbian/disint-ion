@@ -1,17 +1,3 @@
-import {
-  IonContent,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonListHeader,
-  IonMenu,
-  IonMenuToggle,
-  IonNote,
-  IonAccordionGroup,
-  IonAccordion
-} from '@ionic/react';
-
 import React from "react";
 import { DisintComment } from "../../models/DisintComment";
 import { MarkdownController } from "../markdown/MarkdownController";
@@ -19,9 +5,9 @@ import { MarkdownEditor } from "../markdown/MarkdownEditor";
 import { userService } from '../../services/users/UserService';
 import { UserProfile } from '../../models/UserProfile';
 import { UserProfileComponent } from './UserProfileComponent';
-import { PopoverButton } from '../shared/PopoverButton';
-import { popoverController } from '@ionic/core';
 import { Subscription } from 'rxjs';
+import { Box, Button, Flex, Icon, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react";
+import { MdArrowDropDown } from "react-icons/md";
 
 class PublishedUserProps {
 }
@@ -69,18 +55,22 @@ export class PublishedUsers extends React.Component<PublishedUserProps, Publishe
   }
 
   render() {
-    return <IonList>
+    return <Box>
       {(this.state?.users || []).map(u =>
-        <IonItem button detail={false} key={u.userId}>
+        <Flex key={u.userId}>
           <UserProfileComponent user={u}></UserProfileComponent>
-          <PopoverButton>
-            <IonItem button onClick={(e) => { this.toggleFollowUser(u); popoverController.dismiss() }} detail={false}>
-              {userService.isFollowing(u) ? 'Unfollow' : 'Follow'}
-            </IonItem>
-          </PopoverButton>
+          <Menu>
+            <MenuButton as={Button} rightIcon={<Icon as={MdArrowDropDown} />}>
+              Menu
+            </MenuButton>
+            <MenuList>
+              <MenuItem onClick={(e) => { this.toggleFollowUser(u); }}>{userService.isFollowing(u) ? 'Unfollow' : 'Follow'}</MenuItem>
+            </MenuList>
+          </Menu>
 
-        </IonItem>
+
+        </Flex>
       )}
-    </IonList>
+    </Box>
   }
 } 

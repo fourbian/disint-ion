@@ -3,19 +3,16 @@ import { DisintComment } from "../../models/DisintComment";
 import { commentQueryService } from "../../services/comments/CommentQueryService"
 import { CommentQuery } from "../../models/CommentQuery";
 import './CommentNavigator.css'
-import { IonList } from "@ionic/react";
 import {
     rectSortingStrategy,
     SortableContext,
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CommentNavigatorItem } from "./CommentNavigatorItem";
-import { SortableItem } from "../test/SortableItem";
 import { DragOverlay } from "@dnd-kit/core";
 import { DraggableItem, selectionService } from "../../services/dnd/SelectionService";
 import { Droppable } from "../../services/dnd/Droppable";
 import { createPortal } from "react-dom";
-import { IonButton, useIonAlert } from '@ionic/react';
 import { commentService } from "../../services/comments/CommentService";
 
 const customRedraw = () => null;
@@ -60,10 +57,15 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
 
     onDrop(sourceComment?: DraggableItem, targetComment?: DraggableItem, index?: number, isCopyOperation?: boolean): boolean {
         // TODO: next up:
-        // * implement support for turning on/off order ability (i.e. dragging inbetween items vs just dropping onto a container only)
+        // * why is blinking on pixel 5 layout when dnd over item in-between?
+        // * drag items in mobile mode between sidebars (auto-show sidebars)
         // * multiple dnd
+        // * update drag overlay to be simpler (i.e. just icon and title or multiple items if multiple)
+        // * restore ionic layout back to the way it was?
+        // * implement support for turning on/off order ability (i.e. dragging inbetween items vs just dropping onto a container only)
         // * plugging in user permissions based on who owns comment
         // * ordering (see loadComments below)
+        // * deploy somewhere to test it out?
         // * other TODO:s in this file
         console.log("onDrop", this.props.id, index, sourceComment, targetComment);
 
@@ -89,7 +91,7 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
 
         this._lastUsedQuery = this.props.query;
         const comments = await commentQueryService.query(this.props.query);
-        const parentComment = this.props.query.parentId ?  await commentService.load(this.props.query.parentId) : null;
+        const parentComment = this.props.query.parentId ? await commentService.load(this.props.query.parentId) : null;
 
         this.setState({ comments });
 
@@ -162,24 +164,6 @@ export class CommentNavigator extends React.Component<CommentNavigatorProps, Com
 
         return (
             <div id={this.props.id} className={'target-dnd-over-container'}>
-                {/*<SortableContext
-                    items={this.items}
-                    strategy={verticalListSortingStrategy}
-                >
-                    <Droppable id="one">
-                        {this.items.map((id, index) => <SortableItem key={id} id={id} />)}
-                    </Droppable>
-                </SortableContext>
-
-                <SortableContext
-                    items={this.items2}
-                    strategy={verticalListSortingStrategy}
-                >
-                    <Droppable id="one">
-                        {this.items2.map((id, index) => <SortableItem key={id} id={id} />)}
-                    </Droppable>
-                </SortableContext>
-        */}
                 <SortableContext items={commentsAndDroppables.map(c => c.domId)} strategy={customRedraw}>
                     {commentsAndDroppables.map((c, index) => {
                         if (c.comment) {

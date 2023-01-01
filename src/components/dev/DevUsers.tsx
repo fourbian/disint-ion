@@ -1,39 +1,19 @@
-import {
-  IonContent,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonListHeader,
-  IonMenu,
-  IonMenuToggle,
-  IonNote,
-  IonAccordionGroup,
-  IonAccordion,
-  IonInput,
-  IonButton,
-  ModalOptions,
-  IonSelect,
-  IonSelectOption
-} from '@ionic/react';
+
 
 import Joi from "joi";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { DisintComment } from "../../models/DisintComment";
 import { MarkdownController } from "../markdown/MarkdownController";
 import { MarkdownEditor } from "../markdown/MarkdownEditor";
 import { userService } from '../../services/users/UserService';
-import { CommonModal } from '../shared/CommonModal';
 import { DevUserForm } from './DevUserForm';
 import { UserProfile, userProfileSchema } from '../../models/UserProfile';
 import { UserProfileComponent } from '../users/UserProfileComponent';
-import { modalController } from '@ionic/core';
 import { join } from 'path';
 import { LocalStorageUserService } from '../../services/users/LocalStorageUserService';
 import { FormState } from '../../models/FormState';
-import { PopoverButton } from '../shared/PopoverButton';
-import { popoverController } from '@ionic/core';
-import { star } from 'ionicons/icons';
+import { Box, Button, Icon, Menu, MenuButton, MenuItem, MenuList, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure } from "@chakra-ui/react";
+import { MdArrowDropDown } from "react-icons/md";
 
 export class DevUsersState {
   modalUserProfile: UserProfile = new UserProfile();
@@ -45,98 +25,118 @@ export class DevUsersState {
 export class DevUsersProps {
 }
 
-export class DevUsers extends React.Component<DevUsersProps, DevUsersState> {
-  commonModal: React.RefObject<CommonModal>;
+export const DevUsers: React.FC<DevUsersProps> = (props) => {
 
+  const { isOpen, onOpen, onClose } = useDisclosure()
 
-  constructor(props: DevUsersProps) {
-    super(props);
-    this.commonModal = React.createRef<CommonModal>();
+  const [state, setState] = useState<DevUsersState>(new DevUsersState());
+
+  function setStateHelper(obj: any) {
+    setState(Object.assign({}, state, obj));
   }
 
-  componentDidMount() {
-    this.updateUserState();
-  }
-
-  updateUserState() {
+  function updateUserState() {
     userService.publishedUsers().then(users => {
-      this.setState({ users });
+      state.users = users;
+      setState(state);
     });
   }
 
-  async onModalCancelUser(): Promise<boolean> {
+  useEffect(() => {
+    updateUserState();
+  }, []);
+  updateUserState();
+
+  async function onModalCancelUser(): Promise<boolean> {
     return true;
   }
 
-  async onModalConfirmUser(): Promise<boolean> {
-    if (this.state.modalHasErrors) {
+  async function onModalConfirmUser(): Promise<boolean> {
+    if (state.modalHasErrors) {
       alert("please fix errors");
       return false;
     } else {
       let currentUserProfile = (userService as LocalStorageUserService).getLoggedInUser();
-      await (userService as LocalStorageUserService).setUserProfileDevOnly(this.state.modalUserProfile); // memory only
-      await userService.updateProfile(this.state.modalUserProfile); // commit to storage
+      await (userService as LocalStorageUserService).setUserProfileDevOnly(state.modalUserProfile); // memory only
+      await userService.updateProfile(state.modalUserProfile); // commit to storage
       // reset to logged in user
       await (userService as LocalStorageUserService).setUserProfileDevOnly(currentUserProfile);
-      this.updateUserState();
+      updateUserState();
       return true;
     }
   }
 
-  onEditUserModal(userProfile: UserProfile) {
-    this.setState({
+  function onEditUserModal(userProfile: UserProfile) {
+    setStateHelper({
       modalUserProfile: userProfile,
       modalTitle: "Edit " + userProfile.username
     });
-    this.commonModal.current?.present();
+    onOpen();
 
   }
 
-  onNewUserModal() {
-    this.setState({
+  function onNewUserModal() {
+    setStateHelper({
       modalUserProfile: new UserProfile(),
       modalTitle: "New user"
     });
-    this.commonModal.current?.present();
+    onOpen();
   }
 
-  onModalUserFormStateChange(devUserFormState: FormState<UserProfile>) {
-    this.setState({
+  function onModalUserFormStateChange(devUserFormState: FormState<UserProfile>) {
+    setStateHelper({
       modalUserProfile: devUserFormState.form,
       modalHasErrors: !!devUserFormState.errors?.size
     });
   }
 
-  login(user: UserProfile) {
+  function login(user: UserProfile) {
     let localUserService = userService as LocalStorageUserService;
     localUserService.setUserProfileDevOnly(user);
     window.location.reload();
   }
 
-  render() {
+  return <div>
+    <Button onClick={() => onNewUserModal()}>
+      New
+    </Button>
 
-    return <div>
-      <IonButton expand="block" onClick={() => this.onNewUserModal()}>
-        New
-      </IonButton>
+    <Box>
+      {(state?.users || []).map(u => {
+        return (
+          // detail='false' to remove the right arrow for iOS devices
+          <Box key={u.userId}>
+            <UserProfileComponent user={u} onClick={(e) => onEditUserModal(u)}></UserProfileComponent>
+            <Menu>
+              <MenuButton as={Button} rightIcon={<Icon as={MdArrowDropDown} />}>
+                Menu
+              </MenuButton>
+              <MenuList>
+                <MenuItem onClick={(e) => { login(u) }}>Login</MenuItem>
+              </MenuList>
+            </Menu>
+          </Box>
+        )
+      })}
+    </Box>
 
-      <IonList>
-        {(this.state?.users || []).map(u => {
-          return (
-            // detail='false' to remove the right arrow for iOS devices
-            <IonItem button detail={false} key={u.userId}>
-              <UserProfileComponent user={u} onClick={(e) => this.onEditUserModal(u)}></UserProfileComponent>
-              <PopoverButton>
-                <IonItem button onClick={(e) => { this.login(u); popoverController.dismiss() }} detail={false}>Login</IonItem>
-              </PopoverButton>
-            </IonItem>
-          )
-        })}
-      </IonList>
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader>{state?.modalTitle}</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <DevUserForm schema={userProfileSchema} onStateChange={state => onModalUserFormStateChange(state)} value={state?.modalUserProfile}></DevUserForm>
+        </ModalBody>
 
-      <CommonModal ref={this.commonModal} onCancel={() => this.onModalCancelUser()} onConfirm={() => this.onModalConfirmUser()} title={this.state?.modalTitle}>
-        <DevUserForm schema={userProfileSchema} onStateChange={state => this.onModalUserFormStateChange(state)} value={this.state?.modalUserProfile}></DevUserForm>
-      </CommonModal>
-    </div>
-  }
+        <ModalFooter>
+          <Button colorScheme='blue' mr={3} onClick={() => onModalConfirmUser()}>
+            Confirm
+          </Button>
+          <Button variant='ghost' onClick={onClose}>Close</Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
+
+  </div>
 } 

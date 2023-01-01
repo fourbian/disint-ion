@@ -1,17 +1,4 @@
-import {
-  IonContent,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonListHeader,
-  IonMenu,
-  IonMenuToggle,
-  IonNote,
-  IonAccordionGroup,
-  IonAccordion,
-  IonInput
-} from '@ionic/react';
+
 
 import React from "react";
 import { DisintComment } from "../../models/DisintComment";

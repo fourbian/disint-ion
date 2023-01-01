@@ -13,7 +13,6 @@ TODO:
 
 import './SelectionService.css'
 import { isMobile } from 'react-device-detect';
-import { alertController, menuController } from "@ionic/core";
 import { CancelDrop, closestCenter, CollisionDetection, DragEndEvent, DragMoveEvent, DragOverEvent, DragStartEvent, DroppableContainer, getFirstCollision, Modifiers, pointerWithin, rectIntersection } from "@dnd-kit/core";
 import { CancelDropArguments } from "@dnd-kit/core/dist/components/DndContext/DndContext";
 import { serviceBus } from '../bus/ServiceBus';
@@ -54,8 +53,8 @@ export class SelectionService {
     dndOverContainerClass = "dnd-over-container";
 
     constructor() {
-        window.addEventListener('mousemove', this.dragMoved.bind(this));
-        window.addEventListener('touchmove', this.dragMoved.bind(this));
+        //window.addEventListener('mousemove', this.dragMoved.bind(this));
+        //window.addEventListener('touchmove', this.dragMoved.bind(this));
     }
 
     registerContainer(containerContext: ContainerContext) {
@@ -110,9 +109,6 @@ export class SelectionService {
 
         // show trash in case user wants to cancel dnd
         serviceBus.emit(new BeginDndEvent("", true));
-    }
-
-    onDragMove(event: DragMoveEvent): void {
 
     }
 
@@ -154,10 +150,15 @@ export class SelectionService {
     }
 
     // TODO: Combine with collision detection strategy?
-    public dragMoved(event: any) {
-        if (!this.isDragging) return;
+    public onDragMove(dragMoveEvent: DragMoveEvent) {
+        const event = dragMoveEvent.activatorEvent;
+        console.log(dragMoveEvent.delta.x, dragMoveEvent.delta.y);
 
         let { x, y } = this.getCoordinates(event);
+        x += dragMoveEvent.delta.x;
+        y += dragMoveEvent.delta.y;
+
+        console.log(x, y);
 
         let el = document.elementFromPoint(x, y);
 
@@ -166,7 +167,6 @@ export class SelectionService {
         // react beautiful dnd takes care of this for us.  if that goes away, uncomment the line below.
         //this.scrollParent(el, x, y);
 
-        console.log(x, y);
         if (el?.nodeName == "ION-MENU") {
             if (isMobile) {
                 this.openMenu(false, 'start');
@@ -183,6 +183,10 @@ export class SelectionService {
     async onDragEnd(event: DragEndEvent) {
         // show trash in case user wants to cancel dnd
         console.log("onDragEnd", event);
+        setTimeout(async () => {
+            //const menus = await menuController.getMenus();
+            //menuController.open('start');
+        }, 1000);
 
         this.onDragCancel(event);
 
@@ -258,12 +262,13 @@ export class SelectionService {
                     targetContainer?.onDrop(sourceItem as DraggableItem, targetItem as DraggableItem, index, /*isCopy=*/false);
                 } else {
                     // ORDER: Must own source or dest to order.  How to do top level ordering?  non-top level ordering?
-                    const alert = await alertController.create({
+                    window.alert("Replace this with chakra alert dialog.  create component for this scenario")
+                    /*const alert = await alertController.create({
                         header: 'Select an action',
                         buttons
                     });
 
-                    alert.present();
+                    alert.present();*/
                 }
 
             } else {
@@ -345,6 +350,7 @@ export class SelectionService {
     menuController_open(side: string) {
         if (!this.menuController_isOpen(side)) {
             let b = document.querySelector(`ion-menu-button[menu='${side}']`);
+            //menuController.open(side);
             (b as any)?.click();
         }
     }
@@ -357,7 +363,7 @@ export class SelectionService {
     }
 
     openMenu(open: boolean, side: string) {
-        console.log("open left menu", open);
+        console.log(`open ${side} menu`, open);
         if (open) {
             this.menuController_open(side);
         } else {
@@ -376,32 +382,33 @@ export class SelectionService {
     }
 
     async toggleLeftMenu() {
-        menuController.toggle('start');
-        setTimeout(async () => this.leftMenuOpen = await menuController.isOpen('start'), 1000);
+        //menuController.toggle('start');
+        //setTimeout(async () => this.leftMenuOpen = await menuController.isOpen('start'), 1000);
     }
 
     async openRightMenu(open: boolean) {
         let isDesktop = !isMobile;
-        let mobileAction = open ? () => menuController.open('end') : () => menuController.close('end');
-        let action = isDesktop ? () => menuController.enable(open, 'end') : mobileAction;
-        let enabled = await menuController.isEnabled('end');
+        //let mobileAction = open ? () => menuController.open('end') : () => menuController.close('end');
+        //let action = isDesktop ? () => menuController.enable(open, 'end') : mobileAction;
+        //let enabled = await menuController.isEnabled('end');
 
-        if (!isDesktop && !enabled) {
-            menuController.enable(true, 'end'); // user switched from desktop to mobile
-        }
+        //if (!isDesktop && !enabled) {
+            //menuController.enable(true, 'end'); // user switched from desktop to mobile
+        //}
+
 
         this.rightMenuOpen = open;
 
-        action();
+        //action();
     }
 
     async toggleRightMenu() {
         let isDesktop = !isMobile;
 
-        let enabled = await menuController.isEnabled('end');
-        let open = isDesktop ? enabled : await menuController.isOpen('end');
+        //let enabled = await menuController.isEnabled('end');
+        //let open = isDesktop ? enabled : await menuController.isOpen('end');
 
-        this.openRightMenu(!open);
+        //this.openRightMenu(!open);
 
         //console.log('enabled', await this.menuController.isEnabled('end'));
         //console.log('open', await this.menuController.isOpen('end'));

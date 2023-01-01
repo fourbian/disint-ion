@@ -5,7 +5,6 @@ import { MarkdownController } from "../markdown/MarkdownController";
 import { MarkdownEditor } from "../markdown/MarkdownEditor";
 import { commentService } from "../../services/comments/CommentService";
 import { commentQueryService } from "../../services/comments/CommentQueryService";
-import { IonAvatar } from "@ionic/react";
 
 export class CommentBriefProps {
   comment?: DisintComment<any>;

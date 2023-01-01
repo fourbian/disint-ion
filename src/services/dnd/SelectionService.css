@@ -23,9 +23,12 @@ and the position is fixed which positions it over the inner clone border*/
 .target-dnd-over-container:after {
     content: '';
 }
+
 .dnd-over-container {
-    position: relative;
+    /* This doesn't work on mobile, for some reason?  Or is it just DevTools mobile? */
+    /*position: relative;*/
 }
+/*
 .dnd-over-container:after {
     position:absolute;
     content: '';
@@ -39,7 +42,7 @@ and the position is fixed which positions it over the inner clone border*/
     -ms-transition: background-color 500ms ease-in-out;
     transition: background-color 500ms ease-in-out;    
 }
-
+*/
 .dnd-overlay {
     opacity: 0.7;
 }

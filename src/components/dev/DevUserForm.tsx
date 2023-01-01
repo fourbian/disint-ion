@@ -1,19 +1,3 @@
-import {
-  IonContent,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonListHeader,
-  IonMenu,
-  IonMenuToggle,
-  IonNote,
-  IonAccordionGroup,
-  IonAccordion,
-  IonInput,
-  IonAvatar
-} from '@ionic/react';
-
 import Joi from 'joi';
 import React from "react";
 import { DisintComment } from "../../models/DisintComment";
@@ -23,6 +7,7 @@ import { userService } from '../../services/users/UserService';
 import { UserProfile } from '../../models/UserProfile';
 import { UserProfileComponent } from '../users/UserProfileComponent';
 import { FormState } from '../../models/FormState';
+import { Avatar, Box, Flex, Input, Stack, Text } from '@chakra-ui/react';
 
 export class DevUserFormProps {
   public onStateChange: (devUserFormState: FormState<UserProfile>) => void;
@@ -42,7 +27,7 @@ export class DevUserForm extends React.Component<DevUserFormProps, FormState<Use
     this.props.onStateChange(newFormState);
   }
 
-  onInput(e: CustomEvent<InputEvent>) {
+  onInput(e: React.FormEvent<HTMLInputElement>) {
     const el = e.target as HTMLInputElement;
     const newUserProfile = new UserProfile(this.state?.form);
     (newUserProfile as any)[el.name] = el.value;
@@ -58,34 +43,29 @@ export class DevUserForm extends React.Component<DevUserFormProps, FormState<Use
     let hasErrors = !!this.state?.errors?.size;
     let errors = this.state?.errors || new Map<string, string>();
     if (hasErrors) {
-      errorItem = <IonItem className={this.state?.errors?.size ? "ion-invalid" : ""}>
-        <IonLabel>{this.state?.validation?.message}</IonLabel>
+      errorItem = <Flex className={this.state?.errors?.size ? "ion-invalid" : ""}>
+        <Text>{this.state?.validation?.message}</Text>
         <span slot="error">{this.state?.validation?.message}</span>
-      </IonItem>;
+      </Flex>;
     }
-    
+
     return (
-      <IonList>
+      <Stack spacing={3}>
         {errorItem}
-        <IonItem className={errors.get('userId') ? "ion-invalid" : ""}>
-          <IonLabel position="stacked">Enter your id</IonLabel>
-          <IonInput type="text" placeholder="Id" name="userId" value={this.state?.form?.userId} onIonInput={e => this.onInput(e)} />
-          <span slot="error">{errors.get('userId')}</span>
-        </IonItem >
-        <IonItem className={errors.get('username') ? "ion-invalid" : ""}>
-          <IonLabel position="stacked">Enter your username</IonLabel>
-          <IonInput type="text" placeholder="Username" name="username" value={this.state?.form?.username} onIonInput={e => this.onInput(e)} />
-          <span slot="error">{errors.get('username')}</span>
-        </IonItem>
-        <IonItem className={errors.get('avatar') ? "ion-invalid" : ""}>
-          <IonAvatar slot="start">
-            <img src={this.state?.form?.avatar} />
-          </IonAvatar>
-          <IonLabel position="stacked">Enter your avatar</IonLabel>
-          <IonInput type="text" placeholder="Avatar" name="avatar" value={this.state?.form?.avatar} onIonInput={e => this.onInput(e)} />
-          <span slot="error">{errors.get('avatar')}</span>
-        </IonItem>
-      </IonList>
+
+        <Input isInvalid={!!errors.get('userId')} type="text" placeholder="Id" name="userId" value={this.state?.form?.userId} onInput={e => this.onInput(e)} />
+        <span slot="error">{errors.get('userId')}</span>
+
+
+        <Input isInvalid={!!errors.get('username')} type="text" placeholder="Username" name="username" value={this.state?.form?.username} onInput={e => this.onInput(e)} />
+        <span slot="error">{errors.get('username')}</span>
+
+        <Input isInvalid={!!errors.get('avatar')} type="text" placeholder="Avatar" name="avatar" value={this.state?.form?.avatar} onInput={e => this.onInput(e)} />
+        <span slot="error">{errors.get('avatar')}</span>
+
+        <Avatar src={this.state?.form?.avatar}>
+        </Avatar>
+      </Stack>
     )
   }
 } 

@@ -7,14 +7,13 @@ import { commentQueryService } from "../../services/comments/CommentQueryService
 import { CommentQuery } from "../../models/CommentQuery";
 import { CommentBrief } from "./CommentBrief";
 //import './CommentNavigatorItem.css'
-import { IonAvatar, IonItem, IonLabel, IonList } from "@ionic/react";
 import { LazyAvatar } from "../users/LazyAvatar";
-import { PopoverButton } from "../shared/PopoverButton";
-import { DragDropContext, Draggable, DraggableProvided, DraggableRubric, DraggableStateSnapshot, Droppable } from 'react-beautiful-dnd';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { commentService } from "../../services/comments/CommentService";
 import { selectionService } from "../../services/dnd/SelectionService";
+import { Button, Flex, Icon, Menu, MenuButton, MenuList } from "@chakra-ui/react";
+import { MdArrowDropDown } from "react-icons/md";
 
 class CommentNavigatorItemProps {
     comment?: DisintComment<any>;
@@ -78,7 +77,7 @@ export const CommentNavigatorItem: React.FC<CommentNavigatorItemProps> = (props)
             {props.id}    
         </div>*/
         <div className="dnd-droppable" id={props.domId}>
-            <IonItem ref={setNodeRef} style={style} {...attributes} {...listeners} button>
+            <Flex ref={setNodeRef} style={style} {...attributes} {...listeners} >
                 <LazyAvatar userId={comment?.userId || ""}>
 
                 </LazyAvatar>
@@ -87,10 +86,15 @@ export const CommentNavigatorItem: React.FC<CommentNavigatorItemProps> = (props)
                     <div style={{ marginBottom: '10px' }}></div>
                 </Link>
                 <span style={{ marginBottom: 'auto' }}>
-                    <PopoverButton>
-                    </PopoverButton>
+                    <Menu>
+                        <MenuButton as={Button} rightIcon={<Icon as={MdArrowDropDown} />}>
+                            Menu
+                        </MenuButton>
+                        <MenuList>
+                        </MenuList>
+                    </Menu>
                 </span>
-            </IonItem>
+            </Flex>
         </div>
     )
 }

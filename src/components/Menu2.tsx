@@ -1,21 +1,6 @@
-import {
-  IonAccordion,
-  IonAccordionGroup,
-  IonContent,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonListHeader,
-  IonMenu,
-  IonMenuToggle,
-  IonNote,
-} from '@ionic/react';
 
 import { useLocation } from 'react-router-dom';
-import { personOutline, archiveOutline, archiveSharp, homeOutline, bookmarkOutline, heartOutline, heartSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, trashOutline, trashSharp, warningOutline, warningSharp } from 'ionicons/icons';
 import './Menu.css';
-import { CeramicPortal } from '../lib/ceramic/ceramic-portal';
 import config from '../config.json'
 import { useState } from 'react';
 import { DevUsers } from './dev/DevUsers';
@@ -24,109 +9,105 @@ import { PublishedUsers } from './users/PublishedUsers';
 import { CommentNavigator } from './comments/CommentNavigator';
 import { CommentQuery } from '../models/CommentQuery';
 import React from 'react';
+import { Accordion, AccordionItem, Box, Flex, Text } from '@chakra-ui/react';
 
 
 const Menu2: React.FC = () => {
   const location = useLocation();
   const [loginName, setLoginName] = useState("");
   const [loginAddress, setLoginAddress] = useState("");
-  let portal = CeramicPortal.getInstance(config.ceramicEndpoints);
+  //let portal = CeramicPortal.getInstance(config.ceramicEndpoints);
   let query = new CommentQuery();
   let commentNavigator = React.createRef<CommentNavigator>();
 
   let connectWallet = async () => {
-    await portal.authenticate();
-    await portal.updateProfile("test name", 'https://avatars.githubusercontent.com/u/1857282?s=64&v=4');
-    let data = (await portal.readProfile()) as any;
+    //await portal.authenticate();
+    //await portal.updateProfile("test name", 'https://avatars.githubusercontent.com/u/1857282?s=64&v=4');
+    //let data = (await portal.readProfile()) as any;
 
-    setLoginName(data.name);
-    setLoginAddress(portal.firstLoginAddress());
+    //setLoginName(data.name);
+    //setLoginAddress(portal.firstLoginAddress());
 
   }
 
-  return (
-    <IonMenu contentId="main" type="reveal" side="end">
-      {/* IonContent breaks auto scrolling when dragging and dropping */}
-      <div style={{overflowY: 'auto', overflowX: 'auto'}}>
-        <IonAccordionGroup>
-          <IonAccordion value="DevUsers">
-            <IonItem slot="header" color="light">
-              <IonLabel>Dev - Users</IonLabel>
-            </IonItem>
-            <div className="ion-padding" slot="content">
-              <DevUsers></DevUsers>
-            </div>
-          </IonAccordion>
-          <IonAccordion value="QuickSearch">
-            <IonItem slot="header" color="light">
-              <IonLabel>Quick Search</IonLabel>
-            </IonItem>
-            <div className="ion-padding" slot="content">
-              <CommentNavigator id={'right'} component="CommentBrief" query={query} ref={commentNavigator}></CommentNavigator>
-            </div>
-          </IonAccordion>
-          <IonAccordion value="RelatedItems">
-            <IonItem slot="header" color="light">
-              <IonLabel>Related Items</IonLabel>
-            </IonItem>
-            <div className="ion-padding" slot="content">
-              Saved Items
-            </div>
-          </IonAccordion>
-          <IonAccordion value="Quality">
-            <IonItem slot="header" color="light">
-              <IonLabel>Quality</IonLabel>
-            </IonItem>
-            <div className="ion-padding" slot="content">
-              Profile and Settings
-            </div>
-          </IonAccordion>
-          <IonAccordion value="FollowingUsers">
-            <IonItem slot="header" color="light">
-              <IonLabel>Following Users</IonLabel>
-            </IonItem>
-            <div className="ion-padding" slot="content">
-              <FollowingUsers></FollowingUsers>
-            </div>
-          </IonAccordion>
-          <IonAccordion value="PublishedUsers">
-            <IonItem slot="header" color="light">
-              <IonLabel>Published Users</IonLabel>
-            </IonItem>
-            <div className="ion-padding" slot="content">
-              <PublishedUsers></PublishedUsers>
-            </div>
-          </IonAccordion>
-          <IonAccordion value="PublishedComments">
-            <IonItem slot="header" color="light">
-              <IonLabel>Published Comments</IonLabel>
-            </IonItem>
-            <div className="ion-padding" slot="content">
-              Profile and Settings
-            </div>
-          </IonAccordion>
-          <IonAccordion value="Profile">
-            <IonItem slot="header" color="light">
-              <IonLabel>Profile</IonLabel>
-            </IonItem>
-            <div className="ion-padding" slot="content">
-              Profile
-            </div>
-          </IonAccordion>
-          <IonAccordion value="Settings">
-            <IonItem slot="header" color="light">
-              <IonLabel>Settings</IonLabel>
-            </IonItem>
-            <div className="ion-padding" slot="content">
-              Settings
-            </div>
-          </IonAccordion>
+  return <Box>
+      <Accordion allowMultiple>
+        <AccordionItem>
+          <Flex slot="header" color="light">
+            <Text>Dev - Users</Text>
+          </Flex>
+          <div className="ion-padding" slot="content">
+            <DevUsers></DevUsers>
+          </div>
+        </AccordionItem>
+        <AccordionItem>
+          <Flex slot="header" color="light">
+            <Text>Quick Search</Text>
+          </Flex>
+          <div className="ion-padding" slot="content">
+            <CommentNavigator id={'right_navigator'} component="CommentBrief" query={query} ref={commentNavigator}></CommentNavigator>
+          </div>
+        </AccordionItem>
+        <AccordionItem>
+          <Flex slot="header" color="light">
+            <Text>Related Items</Text>
+          </Flex>
+          <div className="ion-padding" slot="content">
+            Saved Items
+          </div>
+        </AccordionItem>
+        <AccordionItem>
+          <Flex slot="header" color="light">
+            <Text>Quality</Text>
+          </Flex>
+          <div className="ion-padding" slot="content">
+            Profile and Settings
+          </div>
+        </AccordionItem>
+        <AccordionItem>
+          <Flex slot="header" color="light">
+            <Text>Following Users</Text>
+          </Flex>
+          <div className="ion-padding" slot="content">
+            <FollowingUsers></FollowingUsers>
+          </div>
+        </AccordionItem>
+        <AccordionItem>
+          <Flex slot="header" color="light">
+            <Text>Published Users</Text>
+          </Flex>
+          <div className="ion-padding" slot="content">
+            <PublishedUsers></PublishedUsers>
+          </div>
+        </AccordionItem>
+        <AccordionItem>
+          <Flex slot="header" color="light">
+            <Text>Published Comments</Text>
+          </Flex>
+          <div className="ion-padding" slot="content">
+            Profile and Settings
+          </div>
+        </AccordionItem>
+        <AccordionItem>
+          <Flex slot="header" color="light">
+            <Text>Profile</Text>
+          </Flex>
+          <div className="ion-padding" slot="content">
+            Profile
+          </div>
+        </AccordionItem>
+        <AccordionItem>
+          <Flex slot="header" color="light">
+            <Text>Settings</Text>
+          </Flex>
+          <div className="ion-padding" slot="content">
+            Settings
+          </div>
+        </AccordionItem>
 
-        </IonAccordionGroup>
+      </Accordion>
 
-      </div>
-    </IonMenu>
-  );
+    </Box>
 };
 
-export default Menu2;
+      export default Menu2;

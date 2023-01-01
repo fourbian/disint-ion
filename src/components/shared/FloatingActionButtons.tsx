@@ -1,8 +1,6 @@
 /* Using with IonPopover Component */
 
 import React, { useState } from 'react';
-import { IonPopover, IonButton, IonIcon, IonFab, IonFabButton } from '@ionic/react';
-import { closeOutline, ellipsisVerticalOutline, saveOutline, sendOutline } from 'ionicons/icons';
 import './FloatingActionButtons.css'
 import { Subscription } from 'rxjs';
 import { serviceBus } from '../../services/bus/ServiceBus';
@@ -13,6 +11,8 @@ import { RequestSaveCommentEvent } from '../../services/bus/RequestSaveCommentEv
 import { EditExistingCommentEvent } from '../../services/bus/EditExistingCommentEvent';
 import { BeginDndEvent } from '../../services/bus/BeginDndEvent';
 import { Droppable } from '../../services/dnd/Droppable';
+import { Box, IconButton } from '@chakra-ui/react';
+import { MdSave, MdSend } from 'react-icons/md';
 
 interface FloatingActionButtonProps {
     addId?: string;
@@ -65,18 +65,18 @@ export class FloatingActionButtons extends React.Component<FloatingActionButtonP
     render() {
         return (
             <>
-                <IonFab vertical="bottom" horizontal="end" slot="fixed">
+                <Box
+                    position='fixed'
+                    bottom='20px'
+                    right={['16px', '84px']}
+                    zIndex={3}>
                     {this.state?.showAdd &&
-                        <IonFabButton>
-                            <IonIcon icon={sendOutline} onClick={() => this.onAdd()} />
-                        </IonFabButton>
+                        <IconButton as={MdSend} onClick={() => this.onAdd()} aria-label={'Add'} />
                     }
                     {this.state?.showSave &&
-                        <IonFabButton>
-                            <IonIcon icon={saveOutline} onClick={() => this.onSave()} />
-                        </IonFabButton>
+                        <IconButton as={MdSave} onClick={() => this.onSave()} aria-label={'Save'} />
                     }
-                </IonFab>
+                </Box>
             </>
         );
     }
